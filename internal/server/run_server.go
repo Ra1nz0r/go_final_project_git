@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ra1nz0r/go_final_project_git/internal/services"
 
@@ -10,8 +11,6 @@ import (
 )
 
 func Run() {
-	r := chi.NewRouter()
-
 	defaultWebDir := "./internal/web/"
 	defaultPort := "7540"
 	dbDefaultPath := "internal/storage_db/scheduler.db"
@@ -24,14 +23,25 @@ func Run() {
 		log.Fatal(err)
 	}
 
+	r := chi.NewRouter()
+
 	fileServer := http.FileServer(http.Dir(defaultWebDir))
 	log.Println("Creating handler.")
 	r.Handle("/*", fileServer)
 
 	log.Printf("Starting server on: '%s'\n", serverLink)
+
+	srv := http.Server{
+		Addr:         serverLink,
+		Handler:      r,
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 5 * time.Minute,
+	}
+
 	log.Println("Listening...")
-	if err := http.ListenAndServe(serverLink, r); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Printf("Error starting server: %s", err.Error())
 		return
 	}
+	log.Println("The server has stopped working.")
 }

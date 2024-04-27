@@ -15,9 +15,9 @@ import (
 // Creates a server startup address and changes the default
 // listening port, if the "TODO _PORT" variable exists in '.env'.
 func SetServerLink(address string, port string) string {
-	if TODO_PORT, exists := os.LookupEnv("TODO_PORT"); exists && TODO_PORT != "" {
+	if TodoPort, exists := os.LookupEnv("TODO_PORT"); exists && TodoPort != "" {
 		log.Println("'TODO_PORT' exitst in '.env' file. Changing default PORT.")
-		port = TODO_PORT
+		port = TodoPort
 	}
 	return address + port
 }
