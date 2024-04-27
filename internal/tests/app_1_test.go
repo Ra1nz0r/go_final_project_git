@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,11 +11,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/joho/godotenv"
+	"github.com/ra1nz0r/go_final_project_git/internal/config"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func getURL(path string) string {
-	port := Port
+	if err := godotenv.Load("../../.env"); err != nil {
+		log.Fatal("No .env file found")
+	}
+	port := config.Port
 	envPort := os.Getenv("TODO_PORT")
 	if len(envPort) > 0 {
 		if eport, err := strconv.ParseInt(envPort, 10, 32); err == nil {

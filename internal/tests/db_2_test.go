@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joho/godotenv"
+	"github.com/ra1nz0r/go_final_project_git/internal/config"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -24,8 +27,11 @@ func count(db *sqlx.DB) (int, error) {
 }
 
 func openDB(t *testing.T) *sqlx.DB {
-	dbfile := DBFile
-	envFile := os.Getenv("TODO_DBFILE")
+	if err := godotenv.Load("../../.env"); err != nil {
+		t.Error("Error loading .env file")
+	}
+	dbfile := config.DBFileTest
+	envFile := os.Getenv("TODO_DBFILE_TEST")
 	if len(envFile) > 0 {
 		dbfile = envFile
 	}
@@ -33,7 +39,6 @@ func openDB(t *testing.T) *sqlx.DB {
 	assert.NoError(t, err)
 	return db
 }
-
 func TestDB(t *testing.T) {
 	db := openDB(t)
 	defer db.Close()
@@ -47,7 +52,7 @@ func TestDB(t *testing.T) {
 	VALUES (?, 'Todo', 'Комментарий', '')`, today)
 	assert.NoError(t, err)
 
-	id, err := res.LastInsertId()
+	id, _ := res.LastInsertId()
 
 	var task Task
 	err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
