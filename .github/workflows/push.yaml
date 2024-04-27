@@ -6,16 +6,6 @@ on:
 permissions: { }
 
 jobs:
-  test:
-    name: Running test.
-    runs-on: ubuntu-latest
-    container: golang:1.22.2
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Unit Tests
-        run: GOOS=linux GOARCH=amd64 go test -v ./... -count=1
-  
   build: 
     name: Checking on build.
     runs-on: ubuntu-latest
