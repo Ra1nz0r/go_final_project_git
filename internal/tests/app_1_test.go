@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"fmt"
 
 	"github.com/joho/godotenv"
 	"github.com/ra1nz0r/go_final_project_git/internal/config"

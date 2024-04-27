@@ -39,8 +39,8 @@ func CheckDBFileExists(resPath string) error {
 
 			// Creating a storage folder for the database.
 			folderDb := filepath.Dir(resPath)
-			if err = os.Mkdir(folderDb, 0777); err != nil {
-				err = nil
+			if err := os.Mkdir(folderDb, 0777); err != nil {
+				log.Println(err)
 			}
 
 			log.Printf("Creating %s and TABLE.", filepath.Base(resPath))
