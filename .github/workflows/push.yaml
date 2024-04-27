@@ -1,5 +1,5 @@
 ---
-name: sprint12_cicd_pipeline
+name: sprint12_cicd_pipelinee
 on:
   push:
 
