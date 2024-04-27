@@ -1,0 +1,31 @@
+---
+name: sprint12_cicd_pipeline
+on:
+  push:
+
+permissions: { }
+
+jobs:
+  lint:
+    name: Checking with Lint.
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+    
+      - name: Super-linter
+        uses: super-linter/super-linter@v6.4.0
+        env:
+          VALIDATE_SHELL_SHFMT: false
+          VALIDATE_BASH_EXEC: false
+          VALIDATE_GO: false
+          DEFAULT_BRANCH: first-steps
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
