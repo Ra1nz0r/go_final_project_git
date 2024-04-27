@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/ra1nz0r/go_final_project_git/internal/models"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // Creates a server startup address and changes the default
