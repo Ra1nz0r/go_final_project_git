@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/ra1nz0r/go_final_project_git/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/config"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -59,7 +59,7 @@ func TestDB(t *testing.T) {
 	}
 
 	var task Task
-	err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
+	err = db.Get(&task, `SELECT id, date, title, comment, repeat FROM scheduler WHERE id=?`, id)
 	assert.NoError(t, err)
 	assert.Equal(t, id, task.ID)
 	assert.Equal(t, `Todo`, task.Title)

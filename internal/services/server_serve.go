@@ -3,58 +3,64 @@ package services
 import (
 	"context"
 	"database/sql"
-	"log"
+	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/ra1nz0r/go_final_project_git/internal/models"
+	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/models"
 )
 
-// Creates a server startup address and changes the default
-// listening port, if the "TODO _PORT" variable exists in '.env'.
-func SetServerLink(address string, port string) string {
-	if TodoPort, exists := os.LookupEnv("TODO_PORT"); exists && TodoPort != "" {
-		log.Println("'TODO_PORT' exitst in '.env' file. Changing default PORT.")
-		port = TodoPort
+// Создает адрес запуска сервера и изменяет порт прослушивания по умолчанию,
+// если переменная «TODO _PORT» существует в «.env».
+// Переменная bool используется один раз, для вывода сообщения о существовании перменной «TODO _PORT» в «.env»
+// и изменении стандартного порта при запуске сервера, в остальных случаях пропускается.
+func SetServerLink(address string, port string) (string, bool) {
+	bool := false
+	if portFromEnv, exists := os.LookupEnv("TODO_PORT"); exists && portFromEnv != "" {
+		port = portFromEnv
+		bool = true
 	}
-	return address + port
+	return address + port, bool
 }
 
-// Changes the default path to the database on "TODO_DBFILE", if a variable exists in '.env'.
-func CheckEnvDbVarOnExists(dbDefaultPath string) string {
-	if dbPathFromSetting := os.Getenv("TODO_DBFILE"); dbPathFromSetting != "" {
-		log.Println("'TODO_DBFILE' exitst in '.env' file. Changing default PATH.")
-		dbDefaultPath = dbPathFromSetting
+// Изменяет путь по умолчанию к базе данных на «TODO_DBFILE», если переменная существует в «.env».
+// Переменная bool используется один раз, для вывода сообщения о существовании перменной «TODO_DBFILE» в «.env»
+// и изменении стандартного пути датабазы при запуске сервера, в остальных случаях пропускается.
+func CheckEnvDbVarOnExists(dbDefaultPath string) (string, bool) {
+	bool := false
+	if dbPathFromEnv := os.Getenv("TODO_DBFILE"); dbPathFromEnv != "" {
+		dbDefaultPath, bool = dbPathFromEnv, true
 	}
-	return dbDefaultPath
+	return dbDefaultPath, bool
 }
 
-// Checking for the existence of a DB.
-// Creating a folder to store DB, '.db' file and TABLE.
+// Проверка существования DB.
+// Создание папки для хранения DB, файла «.db» и TABLE.
 func CheckDBFileExists(resPath string) error {
-	if _, err := os.Stat(resPath); err != nil {
-		if os.IsNotExist(err) {
+	if _, errStat := os.Stat(resPath); errStat != nil {
+		if os.IsNotExist(errStat) {
 
-			// Creating a storage folder for the database.
+			// Создание папки хранения для базы данных.
 			folderDb := filepath.Dir(resPath)
-			if err := os.Mkdir(folderDb, 0777); err != nil {
-				log.Println(err)
+			if errMkDir := os.Mkdir(folderDb, 0777); errMkDir != nil {
+				return fmt.Errorf("failed: cannot create folder: %v", errMkDir)
 			}
 
-			log.Printf("Creating %s and TABLE.", filepath.Base(resPath))
+			config.LogInfo.Info().Msgf("Creating %s and TABLE.", filepath.Base(resPath))
 			ctx := context.Background()
-			db, err := sql.Open("sqlite3", resPath)
-			if err != nil {
-				return err
+			db, errOpen := sql.Open("sqlite3", resPath)
+			if errOpen != nil {
+				return fmt.Errorf("failed: cannot open db: %v", errOpen)
 			}
 
-			// Creating TABLE.
-			if _, err := db.ExecContext(ctx, models.Ddl); err != nil {
-				return err
+			// Создание TABLE.
+			if _, errCreate := db.ExecContext(ctx, models.Ddl); errCreate != nil {
+				return fmt.Errorf("failed: cannot create table db: %v", errCreate)
 			}
 			return nil
 		}
 	}
-	log.Println("Database 'scheduler.db' exists.")
+	config.LogInfo.Info().Msgf("Database %s exists.", filepath.Base(resPath))
 	return nil
 }

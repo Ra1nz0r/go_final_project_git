@@ -7,12 +7,13 @@ package database
 
 import (
 	"context"
+	"strings"
 )
 
 const createTask = `-- name: CreateTask :one
-INSERT INTO scheduler (date, title, comment, repeat)
-VALUES (?, ?, ?, ?)
-RETURNING id, date, title, comment, repeat
+INSERT INTO scheduler (date, title, comment, repeat, search)
+VALUES (?, ?, ?, ?, ?)
+RETURNING id, date, title, comment, repeat, search
 `
 
 type CreateTaskParams struct {
@@ -20,6 +21,7 @@ type CreateTaskParams struct {
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
 	Repeat  string `json:"repeat"`
+	Search  string `json:"search"`
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Scheduler, error) {
@@ -28,6 +30,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Schedul
 		arg.Title,
 		arg.Comment,
 		arg.Repeat,
+		strings.ToLower(arg.Title + " " + arg.Comment),
 	)
 	var i Scheduler
 	err := row.Scan(
@@ -36,6 +39,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Schedul
 		&i.Title,
 		&i.Comment,
 		&i.Repeat,
+		&i.Search,
 	)
 	return i, err
 }
@@ -45,21 +49,33 @@ DELETE FROM scheduler
 WHERE id = ?
 `
 
-func (q *Queries) DeleteTask(ctx context.Context, id int64) error {
+func (q *Queries) DeleteTask(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deleteTask, id)
 	return err
 }
 
 const getTask = `-- name: GetTask :one
-SELECT id, date, title, comment, repeat
+SELECT id,
+    date,
+    title,
+    comment,
+    repeat
 FROM scheduler
 WHERE id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetTask(ctx context.Context, id int64) (Scheduler, error) {
+type GetTaskRow struct {
+	ID      string  `json:"id"`
+	Date    string `json:"date"`
+	Title   string `json:"title"`
+	Comment string `json:"comment"`
+	Repeat  string `json:"repeat"`
+}
+
+func (q *Queries) GetTask(ctx context.Context, id string) (GetTaskRow, error) {
 	row := q.db.QueryRowContext(ctx, getTask, id)
-	var i Scheduler
+	var i GetTaskRow
 	err := row.Scan(
 		&i.ID,
 		&i.Date,
@@ -71,20 +87,33 @@ func (q *Queries) GetTask(ctx context.Context, id int64) (Scheduler, error) {
 }
 
 const listTasks = `-- name: ListTasks :many
-SELECT id, date, title, comment, repeat
+SELECT id,
+    date,
+    title,
+    comment,
+    repeat
 FROM scheduler
 ORDER BY date
+LIMIT 10
 `
 
-func (q *Queries) ListTasks(ctx context.Context) ([]Scheduler, error) {
+type ListTasksRow struct {
+	ID      string  `json:"id"`
+	Date    string `json:"date"`
+	Title   string `json:"title"`
+	Comment string `json:"comment"`
+	Repeat  string `json:"repeat"`
+}
+
+func (q *Queries) ListTasks(ctx context.Context) ([]ListTasksRow, error) {
 	rows, err := q.db.QueryContext(ctx, listTasks)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Scheduler
+	var items []ListTasksRow
 	for rows.Next() {
-		var i Scheduler
+		var i ListTasksRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Date,
@@ -105,12 +134,126 @@ func (q *Queries) ListTasks(ctx context.Context) ([]Scheduler, error) {
 	return items, nil
 }
 
+const searchDate = `-- name: SearchDate :many
+SELECT id,
+    date,
+    title,
+    comment,
+    repeat
+FROM scheduler
+WHERE date LIKE ?
+LIMIT 10
+`
+
+type SearchDateRow struct {
+	ID      string  `json:"id"`
+	Date    string `json:"date"`
+	Title   string `json:"title"`
+	Comment string `json:"comment"`
+	Repeat  string `json:"repeat"`
+}
+
+func (q *Queries) SearchDate(ctx context.Context, date string) ([]SearchDateRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchDate, date)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchDateRow
+	for rows.Next() {
+		var i SearchDateRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Date,
+			&i.Title,
+			&i.Comment,
+			&i.Repeat,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchTasks = `-- name: SearchTasks :many
+SELECT id,
+    date,
+    title,
+    comment,
+    repeat
+FROM scheduler
+WHERE search LIKE ?
+ORDER BY date
+LIMIT 10
+`
+
+type SearchTasksRow struct {
+	ID      string  `json:"id"`
+	Date    string `json:"date"`
+	Title   string `json:"title"`
+	Comment string `json:"comment"`
+	Repeat  string `json:"repeat"`
+}
+
+func (q *Queries) SearchTasks(ctx context.Context, search string) ([]SearchTasksRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchTasks, search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchTasksRow
+	for rows.Next() {
+		var i SearchTasksRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Date,
+			&i.Title,
+			&i.Comment,
+			&i.Repeat,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateDateTask = `-- name: UpdateDateTask :exec
+UPDATE scheduler
+set date = ?
+WHERE id = ?
+`
+
+type UpdateDateTaskParams struct {
+	Date string `json:"date"`
+	ID   string  `json:"id"`
+}
+
+func (q *Queries) UpdateDateTask(ctx context.Context, arg UpdateDateTaskParams) error {
+	_, err := q.db.ExecContext(ctx, updateDateTask, arg.Date, arg.ID)
+	return err
+}
+
 const updateTask = `-- name: UpdateTask :exec
 UPDATE scheduler
 set date = ?,
     title = ?,
     comment = ?,
-    repeat = ?
+    repeat = ?,
+    search = ?
 WHERE id = ?
 `
 
@@ -119,7 +262,8 @@ type UpdateTaskParams struct {
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
 	Repeat  string `json:"repeat"`
-	ID      int64  `json:"id"`
+	Search  string `json:"search"`
+	ID      string  `json:"id"`
 }
 
 func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
@@ -128,6 +272,7 @@ func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
 		arg.Title,
 		arg.Comment,
 		arg.Repeat,
+		strings.ToLower(arg.Title + " " + arg.Comment),
 		arg.ID,
 	)
 	return err

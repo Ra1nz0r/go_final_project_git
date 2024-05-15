@@ -1,35 +1,54 @@
 package server
 
 import (
-	"log"
+	"context"
+	"errors"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/ra1nz0r/go_final_project_git/internal/services"
+	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/services"
+	"github.com/ra1nz0r/go_final_project/internal/transport"
 
 	"github.com/go-chi/chi"
 )
 
 func Run() {
-	defaultWebDir := "./internal/web/"
-	defaultPort := "7540"
-	dbDefaultPath := "internal/storage_db/scheduler.db"
+	serverLink, bool := services.SetServerLink(":", config.DefaultPort)
+	if bool {
+		config.LogInfo.Info().Msg("'TODO_PORT' exitst in '.env' file. Changing default PORT.")
+	}
+	dbResultPath, bool := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
+	if bool {
+		config.LogInfo.Info().Msg("'TODO_DBFILE' exitst in '.env' file. Changing default PATH.")
+	}
 
-	serverLink := services.SetServerLink(":", defaultPort)
-	dbResultPath := services.CheckEnvDbVarOnExists(dbDefaultPath)
-
-	log.Println("Checking DB on exists.")
-	if err := services.CheckDBFileExists(dbResultPath); err != nil {
-		log.Fatal(err)
+	config.LogInfo.Info().Msg("Checking DB on exists.")
+	if errCheck := services.CheckDBFileExists(dbResultPath); errCheck != nil {
+		config.LogErr.Fatal().Err(errCheck).Msgf("Cannot check DB on exists.")
 	}
 
 	r := chi.NewRouter()
 
-	fileServer := http.FileServer(http.Dir(defaultWebDir))
-	log.Println("Creating handler.")
+	fileServer := http.FileServer(http.Dir(config.DefaultWebDir))
+	config.LogInfo.Info().Msg("Running handlers.")
 	r.Handle("/*", fileServer)
 
-	log.Printf("Starting server on: '%s'\n", serverLink)
+	r.Get("/api/nextdate", transport.NextDateHand)
+
+	r.Get("/api/tasks", transport.UpcomingTasksWithSearch)
+
+	r.Post("/api/task/done", transport.GeneratedNextDate)
+
+	r.Delete("/api/task", transport.DeleteTaskScheduler)
+	r.Get("/api/task", transport.GetTaskById)
+	r.Post("/api/task", transport.AddSchedulerTask)
+	r.Put("/api/task", transport.UpdateTask)
+
+	config.LogInfo.Info().Msgf("Starting server on: '%s'", serverLink)
 
 	srv := http.Server{
 		Addr:         serverLink,
@@ -38,10 +57,22 @@ func Run() {
 		WriteTimeout: 5 * time.Minute,
 	}
 
-	log.Println("Listening...")
-	if err := srv.ListenAndServe(); err != nil {
-		log.Printf("Error starting server: %s", err.Error())
-		return
+	go func() {
+		if errListn := srv.ListenAndServe(); !errors.Is(errListn, http.ErrServerClosed) {
+			config.LogErr.Fatal().Err(errListn).Msg("HTTP server error.")
+		}
+		config.LogInfo.Info().Msg("Stopped serving new connections.")
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if errShut := srv.Shutdown(shutdownCtx); errShut != nil {
+		config.LogErr.Fatal().Err(errShut).Msg("HTTP shutdown error")
 	}
-	log.Println("The server has stopped working.")
+	config.LogInfo.Info().Msg("Graceful shutdown complete.")
 }
