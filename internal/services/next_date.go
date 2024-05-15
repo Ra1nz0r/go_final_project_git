@@ -7,29 +7,6 @@ import (
 	"time"
 )
 
-func CheckRepeat(clearRep []string) bool {
-	if len(clearRep) > 3 {
-		return false
-	}
-
-	if !strings.ContainsAny(clearRep[0], "dwmy") {
-		return false
-	}
-
-	if len(clearRep) == 3 && clearRep[0] != "m" {
-		return false
-	}
-
-	if len(clearRep) == 1 && clearRep[0] != "y" {
-		return false
-	}
-
-	if len(clearRep) > 1 && clearRep[0] == "y" {
-		return false
-	}
-	return true
-}
-
 // Подготовка REPEAT-запроса для работы, очистка от пробелов вокруг символов.
 // А также частичная проверка на корректность запроса.
 // В случае некорректности запроса, возвращает ошибку.
@@ -84,19 +61,13 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		return "", fmt.Errorf("failed: incorrect REPEAT format")
 	}
 
-	// Еще одна стадия проверок корректности REPEAT-запроса.
-	if check := CheckRepeat(clearRep); !check {
-		return "", fmt.Errorf("failed: incorrect REPEAT format '%s'", clearRep)
-	}
-
 	// Создаем мапу цифр из переданных значений в запросе.
 	numRepeatTask, errMap := repNumsParse(clearRep)
 	if errMap != nil {
 		return "", errMap
 	}
 
-	var returnValue string // итоговое возвращаемое значение из функции
-	resDate := startDate   // дата с которой производятся расчеты и сравнения в функции
+	resDate := startDate // дата с которой производятся расчеты и сравнения в функции
 
 	resMap := make(map[uint16]time.Time) // результирующая для первых чисел в repeat
 	resMin := ^uint16(0)                 // хранит наименьшее значение пройденных дней из мапы resMap
@@ -105,7 +76,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	resMinMonth := ^uint8(0)                  // хранит наименьшее значение пройденных месяцев из мапы resMapMonth
 
 	switch {
-	case clearRep[0] == "d":
+	case clearRep[0] == "d" && len(clearRep) == 2:
 		for _, dNum := range numRepeatTask {
 			if dNum[0] < 1 || dNum[0] > 400 {
 				return "", fmt.Errorf("failed: value (%d) DAY must be between 1 and 400", dNum)
@@ -119,8 +90,8 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 				resDate = resDate.AddDate(0, 0, dNum[0])
 			}
 		}
-		returnValue = resDate.Format("20060102")
-	case clearRep[0] == "y":
+		return resDate.Format("20060102"), nil
+	case clearRep[0] == "y" && len(clearRep) == 1:
 		// Пока текущая дата идет после расчётной, прибавляем год к расчётной.
 		for currentDate.After(resDate) {
 			resDate = resDate.AddDate(1, 0, 0)
@@ -129,8 +100,8 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		if resDate == startDate {
 			resDate = resDate.AddDate(1, 0, 0)
 		}
-		returnValue = resDate.Format("20060102")
-	case clearRep[0] == "w":
+		return resDate.Format("20060102"), nil
+	case clearRep[0] == "w" && len(clearRep) == 2:
 		// Достаем числа, переданные в REPEAT, из мапы и работаем с ними.
 		for _, value := range numRepeatTask {
 			for _, wNum := range value {
@@ -161,8 +132,8 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 				resDate = startDate
 			}
 		}
-		returnValue = resMap[resMin].Format("20060102")
-	case clearRep[0] == "m":
+		return resMap[resMin].Format("20060102"), nil
+	case clearRep[0] == "m" && len(clearRep) < 4:
 		for key := len(numRepeatTask) - 1; key >= 0; key-- { // перебор с конца мапы, чтобы сначала работать с месяцами,
 			for _, mNum := range numRepeatTask[key] { //        найти ближайший и передать значение для работы с первыми числами (дни месяца)
 				var cntDayPass uint16  // количествой пройденных дней
@@ -200,6 +171,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 						}
 						// Записываем количество пройденных дней и итоговую дату в результирующую мапу.
 						resMap[cntDayPass] = resDate
+
 					}
 					// Если текущее кол-во пройденных дней меньше сохранненого, то перезаписываем значение.
 					if cntDayPass < resMin {
@@ -229,9 +201,11 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 					// Сбрасываем итоговую дату на стартовую.
 					resDate = startDate
 				}
+
 			}
+
 		}
-		returnValue = resMap[resMin].Format("20060102")
+		return resMap[resMin].Format("20060102"), nil
 	}
-	return returnValue, nil
+	return "", fmt.Errorf("failed: incorrect REPEAT format '%s'", ruleRepeat)
 }
