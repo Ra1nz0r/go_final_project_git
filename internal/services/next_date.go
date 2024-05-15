@@ -8,19 +8,9 @@ import (
 )
 
 // Подготовка REPEAT-запроса для работы, очистка от пробелов вокруг символов.
-// А также частичная проверка на корректность запроса.
-// В случае некорректности запроса, возвращает ошибку.
-func repTrimSpace(ruleRepeat string) ([]string, error) {
+func repTrimSpace(ruleRepeat string) (clearRep []string, errTrim error) {
 	dirtyRepeat := strings.Split(strings.TrimSpace(ruleRepeat), " ")
-	var clearRep []string
-	for i := range dirtyRepeat {
-		if dirtyRepeat[i] != "" {
-			if i > 0 && !strings.ContainsAny(dirtyRepeat[i], "1234567890") {
-				return nil, fmt.Errorf("failed: incorrect REPEAT format")
-			}
-			clearRep = append(clearRep, dirtyRepeat[i])
-		}
-	}
+	clearRep = append(clearRep, dirtyRepeat...)
 	return clearRep, nil
 }
 
@@ -77,19 +67,22 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 
 	switch {
 	case clearRep[0] == "d" && len(clearRep) == 2:
-		for _, dNum := range numRepeatTask {
-			if dNum[0] < 1 || dNum[0] > 400 {
-				return "", fmt.Errorf("failed: value (%d) DAY must be between 1 and 400", dNum)
-			}
-			// Пока текущая дата идет после расчётной, прибавляем указанные дни к расчётной.
-			for currentDate.After(resDate) {
-				resDate = resDate.AddDate(0, 0, dNum[0])
-			}
-			// Если итоговая дата не изменилась и равна расчётной, то прибавляем дни к расчётной.
-			if resDate == startDate {
-				resDate = resDate.AddDate(0, 0, dNum[0])
-			}
+		// dNum - число переданное в REPEAT, для примера [d 56] оно будет равно 56,
+		// должно быть в диапазоне 1-400 и может быть только одно ([d 56 1], ошибка).
+		dNum := numRepeatTask[0][0]
+
+		if dNum < 1 || dNum > 400 {
+			return "", fmt.Errorf("failed: value (%d) DAY must be between 1 and 400", dNum)
 		}
+		// Пока текущая дата идет после расчётной, прибавляем указанные дни к расчётной.
+		for currentDate.After(resDate) {
+			resDate = resDate.AddDate(0, 0, dNum)
+		}
+		// Если итоговая дата не изменилась и равна расчётной, то прибавляем дни к расчётной.
+		if resDate == startDate {
+			resDate = resDate.AddDate(0, 0, dNum)
+		}
+
 		return resDate.Format("20060102"), nil
 	case clearRep[0] == "y" && len(clearRep) == 1:
 		// Пока текущая дата идет после расчётной, прибавляем год к расчётной.
