@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-// Подготовка REPEAT-запроса для работы, очистка от пробелов вокруг символов.
-func repTrimSpace(ruleRepeat string) (clearRep []string, errTrim error) {
-	dirtyRepeat := strings.Split(strings.TrimSpace(ruleRepeat), " ")
-	clearRep = append(clearRep, dirtyRepeat...)
-	return clearRep, nil
-}
-
 // Проверка и создание числовой карты для работы, из чисел в REPEAT-запросе,
 // исключая первый символ, со сменой типа string на int.
 // А также частичная проверка на корректность запроса.
@@ -22,8 +15,7 @@ func repNumsParse(clearRepeat []string) (map[int][]int, error) {
 	var totalResult []int
 	numResMap := make(map[int][]int)
 	for key, value := range clearRepeat[1:] {
-		t := strings.Split(value, ",")
-		for _, j := range t {
+		for _, j := range strings.Split(value, ",") {
 			num, errAtoi := strconv.Atoi(j)
 			if errAtoi != nil {
 				return nil, fmt.Errorf("failed: incorrect symbols in second/third REPEAT part (%s)", clearRepeat)
@@ -45,9 +37,9 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		return "", fmt.Errorf("failed: incorrect DATE (%v)", errPars)
 	}
 
-	// Очищаем REPEAT-запрос и готовим для работы.
-	clearRep, errTrim := repTrimSpace(ruleRepeat)
-	if errTrim != nil || clearRep == nil {
+	// Подготовка REPEAT-запроса для работы, очистка от пробелов вокруг символов.
+	clearRep := strings.Split(strings.TrimSpace(ruleRepeat), " ")
+	if clearRep == nil {
 		return "", fmt.Errorf("failed: incorrect REPEAT format")
 	}
 
@@ -56,6 +48,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	if errMap != nil {
 		return "", errMap
 	}
+	//-------------------------------------------------
 
 	resDate := startDate // дата с которой производятся расчеты и сравнения в функции
 
@@ -65,8 +58,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	resMapMonth := make(map[uint8]time.Month) // результирующая для вторых чисел в repeat, используется при передаче m значения
 	resMinMonth := ^uint8(0)                  // хранит наименьшее значение пройденных месяцев из мапы resMapMonth
 
-	switch {
-	case clearRep[0] == "d" && len(clearRep) == 2:
+	if clearRep[0] == "d" && len(clearRep) == 2 {
 		// dNum - число переданное в REPEAT, для примера [d 56] оно будет равно 56,
 		// должно быть в диапазоне 1-400 и может быть только одно ([d 56 1], ошибка).
 		dNum := numRepeatTask[0][0]
@@ -84,7 +76,9 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		}
 
 		return resDate.Format("20060102"), nil
-	case clearRep[0] == "y" && len(clearRep) == 1:
+	}
+
+	if clearRep[0] == "y" && len(clearRep) == 1 {
 		// Пока текущая дата идет после расчётной, прибавляем год к расчётной.
 		for currentDate.After(resDate) {
 			resDate = resDate.AddDate(1, 0, 0)
@@ -94,7 +88,9 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 			resDate = resDate.AddDate(1, 0, 0)
 		}
 		return resDate.Format("20060102"), nil
-	case clearRep[0] == "w" && len(clearRep) == 2:
+	}
+
+	if clearRep[0] == "w" && len(clearRep) == 2 {
 		// Достаем числа, переданные в REPEAT, из мапы и работаем с ними.
 		for _, value := range numRepeatTask {
 			for _, wNum := range value {
@@ -126,7 +122,9 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 			}
 		}
 		return resMap[resMin].Format("20060102"), nil
-	case clearRep[0] == "m" && len(clearRep) < 4:
+	}
+
+	if clearRep[0] == "m" && len(clearRep) < 4 {
 		for key := len(numRepeatTask) - 1; key >= 0; key-- { // перебор с конца мапы, чтобы сначала работать с месяцами,
 			for _, mNum := range numRepeatTask[key] { //        найти ближайший и передать значение для работы с первыми числами (дни месяца)
 				var cntDayPass uint16  // количествой пройденных дней
@@ -194,9 +192,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 					// Сбрасываем итоговую дату на стартовую.
 					resDate = startDate
 				}
-
 			}
-
 		}
 		return resMap[resMin].Format("20060102"), nil
 	}
