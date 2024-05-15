@@ -7,6 +7,29 @@ import (
 	"time"
 )
 
+func CheckRepeat(clearRep []string) bool {
+	if len(clearRep) > 3 {
+		return false
+	}
+
+	if !strings.ContainsAny(clearRep[0], "dwmy") {
+		return false
+	}
+
+	if len(clearRep) == 3 && clearRep[0] != "m" {
+		return false
+	}
+
+	if len(clearRep) == 1 && clearRep[0] != "y" {
+		return false
+	}
+
+	if len(clearRep) > 1 && clearRep[0] == "y" {
+		return false
+	}
+	return true
+}
+
 // Подготовка REPEAT-запроса для работы, очистка от пробелов вокруг символов.
 // А также частичная проверка на корректность запроса.
 // В случае некорректности запроса, возвращает ошибку.
@@ -57,15 +80,12 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 
 	// Очищаем REPEAT-запрос и готовим для работы.
 	clearRep, errTrim := repTrimSpace(ruleRepeat)
-	if errTrim != nil {
-		return "", errTrim
+	if errTrim != nil || clearRep == nil {
+		return "", fmt.Errorf("failed: incorrect REPEAT format")
 	}
 
 	// Еще одна стадия проверок корректности REPEAT-запроса.
-	condNum1 := clearRep == nil || len(clearRep) > 3 || len(clearRep[0]) > 1 || !strings.ContainsAny(clearRep[0], "dwmy")
-	condNum2 := len(clearRep) == 3 && clearRep[0] != "m"
-	condNum3 := len(clearRep) == 1 && clearRep[0] != "y" || len(clearRep) > 1 && clearRep[0] == "y"
-	if condNum1 || condNum2 || condNum3 {
+	if check := CheckRepeat(clearRep); !check {
 		return "", fmt.Errorf("failed: incorrect REPEAT format '%s'", clearRep)
 	}
 
