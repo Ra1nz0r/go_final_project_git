@@ -55,8 +55,8 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	resMap := make(map[uint16]time.Time) // результирующая для первых чисел в repeat
 	resMin := ^uint16(0)                 // хранит наименьшее значение пройденных дней из мапы resMap
 
-	resMapMonth := make(map[uint8]time.Month) // результирующая для вторых чисел в repeat, используется при передаче m значения
-	resMinMonth := ^uint8(0)                  // хранит наименьшее значение пройденных месяцев из мапы resMapMonth
+	//resMapMonth := make(map[uint8]time.Month) // результирующая для вторых чисел в repeat, используется при передаче m значения
+	//resMinMonth := ^uint8(0)                  // хранит наименьшее значение пройденных месяцев из мапы resMapMonth
 
 	if clearRep[0] == "d" && len(clearRep) == 2 {
 		// dNum - число переданное в REPEAT, для примера [d 56] оно будет равно 56,
@@ -124,77 +124,5 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		return resMap[resMin].Format("20060102"), nil
 	}
 
-	if clearRep[0] == "m" && len(clearRep) < 4 {
-		for key := len(numRepeatTask) - 1; key >= 0; key-- { // перебор с конца мапы, чтобы сначала работать с месяцами,
-			for _, mNum := range numRepeatTask[key] { //        найти ближайший и передать значение для работы с первыми числами (дни месяца)
-				var cntDayPass uint16  // количествой пройденных дней
-				var cntMonthPass uint8 // количество пройденных месяцев
-				switch {
-				case key == 0:
-					if mNum < -2 || mNum > 31 {
-						return "", fmt.Errorf("failed: value (%d) DAY_MONTH must be between -2 and 31", mNum)
-					}
-					// Если текущая дата идёт после стартовой, то перезаписываем итоговую на текущую.
-					if currentDate.After(startDate) {
-						resDate = currentDate
-					}
-					switch {
-					case mNum < 0:
-						// Увеличиваем месяц на один от итогового, чтобы сравнивать и искать последний день месяца.
-						compareMonth := resDate.Month() + 1
-						// Пока итоговый месяц не равен сравниваемому, то прибавляем дни и считаем их кол-во.
-						for ok := true; ok; ok = (resDate.Month() != compareMonth) {
-							resDate = resDate.AddDate(0, 0, 1)
-							cntDayPass++
-						}
-						// Записываем количество пройденных дней и итоговую дату в результирующую мапу,
-						// вычитая один(два) день(я) для нахождения последнего(предпоследнего) дня месяца.
-						resMap[cntDayPass] = resDate.AddDate(0, 0, mNum)
-					default:
-						// Если мапа с месяцами не пустая, то обновляем значение итоговой даты,
-						if len(resMapMonth) > 0 {
-							resDate = resDate.AddDate(0, int(resMinMonth)-1, 0)
-						}
-						// Пока день итоговый даты не равен переданному, то прибавляем дни и считаем их кол-во.
-						for ok := true; ok; ok = (resDate.Day() != mNum) {
-							resDate = resDate.AddDate(0, 0, 1)
-							cntDayPass++
-						}
-						// Записываем количество пройденных дней и итоговую дату в результирующую мапу.
-						resMap[cntDayPass] = resDate
-
-					}
-					// Если текущее кол-во пройденных дней меньше сохранненого, то перезаписываем значение.
-					if cntDayPass < resMin {
-						resMin = cntDayPass
-					}
-					// Сбрасываем итоговую дату на стартовую.
-					resDate = startDate
-				case key == 1:
-					if mNum < 1 || mNum > 12 {
-						return "", fmt.Errorf("failed: value (%d) MONTH must be between 1 and 12", mNum)
-					}
-					// Если текущая дата идёт после стартовой, то перезаписываем итоговую на текущую.
-					if currentDate.After(startDate) {
-						resDate = currentDate
-					}
-					// Пока итоговый месяц не равен переданному, то прибавляем месяца и считаем их кол-во.
-					for ok := true; ok; ok = (resDate.Month() != time.Month(mNum)) {
-						resDate = resDate.AddDate(0, 1, 0)
-						cntMonthPass++
-					}
-					// Записываем количество пройденных месяцев и итоговый месяц в результирующую мапу.
-					resMapMonth[cntMonthPass] = time.Month(mNum)
-					// Если текущее кол-во пройденных месяцев меньше сохранненого, то перезаписываем значение.
-					if cntMonthPass < resMinMonth {
-						resMinMonth = cntMonthPass
-					}
-					// Сбрасываем итоговую дату на стартовую.
-					resDate = startDate
-				}
-			}
-		}
-		return resMap[resMin].Format("20060102"), nil
-	}
 	return "", fmt.Errorf("failed: incorrect REPEAT format '%s'", ruleRepeat)
 }
