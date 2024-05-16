@@ -80,7 +80,7 @@ func weekRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, c
 			resDate = startDate
 		}
 	}
-	return resMap[min(resMap)].Format("20060102"), nil
+	return resMap[minValue(resMap)].Format("20060102"), nil
 }
 
 func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, currentDate, startDate, resDate time.Time) (string, error) {
@@ -134,7 +134,7 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, 
 			}
 		}
 	}
-	return resMap[min(resMap)].Format("20060102"), nil
+	return resMap[minValue(resMap)].Format("20060102"), nil
 }
 
 func nearestMonth(resMapMonth map[uint16]time.Month, resMinMonth uint16, mNum int, currentDate, startDate, resDate time.Time) uint16 {
@@ -159,7 +159,7 @@ func nearestMonth(resMapMonth map[uint16]time.Month, resMinMonth uint16, mNum in
 	return resMinMonth
 }
 
-func min(resMap map[uint16]time.Time) uint16 {
+func minValue(resMap map[uint16]time.Time) uint16 {
 	var minNumber uint16
 	for minNumber = range resMap {
 		break
