@@ -57,7 +57,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 
 	// Если введеная DATE меньше текущей и поле REPEAT не заполнено,
 	// перезаписываем DATE на текущую дату. В противном случае, проверяем корректность
-	// REPEAT и если DATE меньше текущей, то перезаписываем на RES значение.
+	// REPEAT и если DATE меньше текущей, то перезаписываем на res значение.
 	if task.Date < time.Now().Format("20060102") {
 		switch {
 		case len(strings.TrimSpace(task.Repeat)) == 0:
