@@ -63,18 +63,15 @@ func weekRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, r
 		for _, wNum := range value {
 			var cntDayPass uint16 // подсчёт пройденных дней
 			if wNum < 1 || wNum > 7 {
-				return "", fmt.Errorf("failed: value (%d) DAY_WEEK must be between 1 and 7", wNum)
+				return "", fmt.Errorf("failed: value DAY_WEEK must be between 1 and 7 (your val '%d')", wNum)
 			}
 			// Если текущая дата идет после стратовой, меняем значение расчётной на текущую.
 			if currentDate.After(startDate) {
 				resDate = currentDate
 			}
-			// Для правильности подсчёта дня недели Воскресенья, меняем цифру на 0.
-			if wNum == 7 {
-				wNum = 0
-			}
+
 			// Пока день недели расчётной даты не равен указанной в REPEAT, прибавляем дни и считаем количество.
-			for ok := true; ok; ok = (resDate.Weekday() != time.Weekday(wNum)) {
+			for ok := true; ok; ok = (resDate.Weekday() != time.Weekday(wNum%7)) { // Находим остаток, потому что Воскресенье = 0, а не 7.
 				resDate = resDate.AddDate(0, 0, 1)
 				cntDayPass++
 			}
@@ -96,12 +93,12 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, 
 	resMinMonth := ^uint8(0)                             // хранит наименьшее значение пройденных месяцев из мапы resMapMonth
 	for key := len(numRepeatTask) - 1; key >= 0; key-- { // перебор с конца мапы, чтобы сначала работать с месяцами,
 		for _, mNum := range numRepeatTask[key] { // найти ближайший и передать значение для работы с первыми числами (дни месяца)
-			var cntDayPass uint16  // количествой пройденных дней
-			var cntMonthPass uint8 // количество пройденных месяцев
+			var cntDayPass uint16 // количествой пройденных дней
+
 			switch {
 			case key == 0:
 				if mNum < -2 || mNum > 31 {
-					return "", fmt.Errorf("failed: value (%d) DAY_MONTH must be between -2 and 31", mNum)
+					return "", fmt.Errorf("failed: value DAY_MONTH must be between -2 and 31 (your val '%d')", mNum)
 				}
 				// Если текущая дата идёт после стартовой, то перезаписываем итоговую на текущую.
 				if currentDate.After(startDate) {
@@ -141,30 +138,35 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, 
 				resDate = startDate
 			case key == 1:
 				if mNum < 1 || mNum > 12 {
-					return "", fmt.Errorf("failed: value (%d) MONTH must be between 1 and 12", mNum)
+					return "", fmt.Errorf("failed: value MONTH must be between 1 and 12 (your val '%d')", mNum)
 				}
-				// Если текущая дата идёт после стартовой, то перезаписываем итоговую на текущую.
-				if currentDate.After(startDate) {
-					resDate = currentDate
-				}
-				// Пока итоговый месяц не равен переданному, то прибавляем месяца и считаем их кол-во.
-				for ok := true; ok; ok = (resDate.Month() != time.Month(mNum)) {
-					resDate = resDate.AddDate(0, 1, 0)
-					cntMonthPass++
-				}
-				// Записываем количество пройденных месяцев и итоговый месяц в результирующую мапу.
-				resMapMonth[cntMonthPass] = time.Month(mNum)
-				// Если текущее кол-во пройденных месяцев меньше сохранненого, то перезаписываем значение.
-				if cntMonthPass < resMinMonth {
-					resMinMonth = cntMonthPass
-				}
-				// Сбрасываем итоговую дату на стартовую.
-				resDate = startDate
+				resMinMonth = nearestMonth(resMapMonth, resMinMonth, mNum, currentDate, startDate, resDate)
 			}
 		}
 	}
 	return resMap[resMin].Format("20060102"), nil
+}
 
+func nearestMonth(resMapMonth map[uint8]time.Month, resMinMonth uint8, mNum int, currentDate, startDate, resDate time.Time) uint8 {
+	var cntMonthPass uint8 // количество пройденных месяцев
+	// Если текущая дата идёт после стартовой, то перезаписываем итоговую на текущую.
+	if currentDate.After(startDate) {
+		resDate = currentDate
+	}
+	// Пока итоговый месяц не равен переданному, то прибавляем месяца и считаем их кол-во.
+	for ok := true; ok; ok = (resDate.Month() != time.Month(mNum)) {
+		resDate = resDate.AddDate(0, 1, 0)
+		cntMonthPass++
+	}
+	// Записываем количество пройденных месяцев и итоговый месяц в результирующую мапу.
+	resMapMonth[cntMonthPass] = time.Month(mNum)
+	// Если текущее кол-во пройденных месяцев меньше сохранненого, то перезаписываем значение.
+	if cntMonthPass < resMinMonth {
+		resMinMonth = cntMonthPass
+	}
+	// Сбрасываем итоговую дату на стартовую.
+	resDate = startDate
+	return resMinMonth
 }
 
 // Функция возвращает следующую дату для задачи в планировщике.
@@ -215,7 +217,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		return result, nil
 	}
 
-	if clearRep[0] == "m" && len(clearRep) < 4 {
+	if clearRep[0] == "m" && (len(clearRep) == 3 || len(clearRep) == 2) {
 		result, errMonth := monthRepeatCount(numRepeatTask, resMap, resMin, currentDate, startDate, resDate)
 		if errMonth != nil {
 			return result, errMonth
