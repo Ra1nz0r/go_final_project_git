@@ -1,10 +1,11 @@
 package services
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"fmt"
 )
 
 // Проверка и создание числовой карты для работы, из чисел в REPEAT-запросе,

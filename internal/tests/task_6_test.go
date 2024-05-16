@@ -2,11 +2,12 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
 	"time"
+
+	"fmt"
 
 	"github.com/stretchr/testify/assert"
 )

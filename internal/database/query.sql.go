@@ -30,7 +30,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Schedul
 		arg.Title,
 		arg.Comment,
 		arg.Repeat,
-		strings.ToLower(arg.Title + " " + arg.Comment),
+		strings.ToLower(arg.Title+" "+arg.Comment),
 	)
 	var i Scheduler
 	err := row.Scan(
@@ -66,7 +66,7 @@ LIMIT 1
 `
 
 type GetTaskRow struct {
-	ID      string  `json:"id"`
+	ID      string `json:"id"`
 	Date    string `json:"date"`
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
@@ -98,7 +98,7 @@ LIMIT 10
 `
 
 type ListTasksRow struct {
-	ID      string  `json:"id"`
+	ID      string `json:"id"`
 	Date    string `json:"date"`
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
@@ -146,7 +146,7 @@ LIMIT 10
 `
 
 type SearchDateRow struct {
-	ID      string  `json:"id"`
+	ID      string `json:"id"`
 	Date    string `json:"date"`
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
@@ -195,7 +195,7 @@ LIMIT 10
 `
 
 type SearchTasksRow struct {
-	ID      string  `json:"id"`
+	ID      string `json:"id"`
 	Date    string `json:"date"`
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
@@ -239,7 +239,7 @@ WHERE id = ?
 
 type UpdateDateTaskParams struct {
 	Date string `json:"date"`
-	ID   string  `json:"id"`
+	ID   string `json:"id"`
 }
 
 func (q *Queries) UpdateDateTask(ctx context.Context, arg UpdateDateTaskParams) error {
@@ -263,7 +263,7 @@ type UpdateTaskParams struct {
 	Comment string `json:"comment"`
 	Repeat  string `json:"repeat"`
 	Search  string `json:"search"`
-	ID      string  `json:"id"`
+	ID      string `json:"id"`
 }
 
 func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
@@ -272,7 +272,7 @@ func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
 		arg.Title,
 		arg.Comment,
 		arg.Repeat,
-		strings.ToLower(arg.Title + " " + arg.Comment),
+		strings.ToLower(arg.Title+" "+arg.Comment),
 		arg.ID,
 	)
 	return err

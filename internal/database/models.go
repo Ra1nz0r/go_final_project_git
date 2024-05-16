@@ -5,7 +5,7 @@
 package database
 
 type Scheduler struct {
-	ID      string  `json:"id"`
+	ID      string `json:"id"`
 	Date    string `json:"date"`
 	Title   string `json:"title"`
 	Comment string `json:"comment"`
