@@ -93,8 +93,6 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, 
 	resMinMonth := ^uint8(0)                             // хранит наименьшее значение пройденных месяцев из мапы resMapMonth
 	for key := len(numRepeatTask) - 1; key >= 0; key-- { // перебор с конца мапы, чтобы сначала работать с месяцами,
 		for _, mNum := range numRepeatTask[key] { // найти ближайший и передать значение для работы с первыми числами (дни месяца)
-			var cntDayPass uint16 // количествой пройденных дней
-
 			switch {
 			case key == 0:
 				if mNum < -2 || mNum > 31 {
@@ -104,32 +102,7 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, 
 				if currentDate.After(startDate) {
 					resDate = currentDate
 				}
-				switch {
-				case mNum < 0:
-					// Увеличиваем месяц на один от итогового, чтобы сравнивать и искать последний день месяца.
-					compareMonth := resDate.Month() + 1
-					// Пока итоговый месяц не равен сравниваемому, то прибавляем дни и считаем их кол-во.
-					for ok := true; ok; ok = (resDate.Month() != compareMonth) {
-						resDate = resDate.AddDate(0, 0, 1)
-						cntDayPass++
-					}
-					// Записываем количество пройденных дней и итоговую дату в результирующую мапу,
-					// вычитая один(два) день(я) для нахождения последнего(предпоследнего) дня месяца.
-					resMap[cntDayPass] = resDate.AddDate(0, 0, mNum)
-				default:
-					// Если мапа с месяцами не пустая, то обновляем значение итоговой даты,
-					if len(resMapMonth) > 0 {
-						resDate = resDate.AddDate(0, int(resMinMonth)-1, 0)
-					}
-					// Пока день итоговый даты не равен переданному, то прибавляем дни и считаем их кол-во.
-					for ok := true; ok; ok = (resDate.Day() != mNum) {
-						resDate = resDate.AddDate(0, 0, 1)
-						cntDayPass++
-					}
-					// Записываем количество пройденных дней и итоговую дату в результирующую мапу.
-					resMap[cntDayPass] = resDate
-
-				}
+				cntDayPass := fff(resMap, resMapMonth, resMinMonth, mNum, resDate)
 				// Если текущее кол-во пройденных дней меньше сохранненого, то перезаписываем значение.
 				if cntDayPass < resMin {
 					resMin = cntDayPass
@@ -145,6 +118,36 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[uint16]time.Time, 
 		}
 	}
 	return resMap[resMin].Format("20060102"), nil
+}
+
+func fff(resMap map[uint16]time.Time, resMapMonth map[uint8]time.Month, resMinMonth uint8, mNum int, resDate time.Time) (cntDayPass uint16) { // количествой пройденных днейuint16
+	switch {
+	case mNum < 0:
+		// Увеличиваем месяц на один от итогового, чтобы сравнивать и искать последний день месяца.
+		compareMonth := resDate.Month() + 1
+		// Пока итоговый месяц не равен сравниваемому, то прибавляем дни и считаем их кол-во.
+		for ok := true; ok; ok = (resDate.Month() != compareMonth) {
+			resDate = resDate.AddDate(0, 0, 1)
+			cntDayPass++
+		}
+		// Записываем количество пройденных дней и итоговую дату в результирующую мапу,
+		// вычитая один(два) день(я) для нахождения последнего(предпоследнего) дня месяца.
+		resMap[cntDayPass] = resDate.AddDate(0, 0, mNum)
+	default:
+		// Если мапа с месяцами не пустая, то обновляем значение итоговой даты,
+		if len(resMapMonth) > 0 {
+			resDate = resDate.AddDate(0, int(resMinMonth)-1, 0)
+		}
+		// Пока день итоговый даты не равен переданному, то прибавляем дни и считаем их кол-во.
+		for ok := true; ok; ok = (resDate.Day() != mNum) {
+			resDate = resDate.AddDate(0, 0, 1)
+			cntDayPass++
+		}
+		// Записываем количество пройденных дней и итоговую дату в результирующую мапу.
+		resMap[cntDayPass] = resDate
+
+	}
+	return
 }
 
 func nearestMonth(resMapMonth map[uint8]time.Month, resMinMonth uint8, mNum int, currentDate, startDate, resDate time.Time) uint8 {
