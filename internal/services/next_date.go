@@ -184,9 +184,6 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	// Подготовка REPEAT для работы, очистка от пробелов вокруг символов и
 	// разбивание на элементы по символу " ".
 	clearRep := strings.Split(strings.TrimSpace(ruleRepeat), " ")
-	if clearRep == nil {
-		return "", fmt.Errorf("failed: incorrect REPEAT format")
-	}
 
 	// Создаем мапу цифр из переданных значений в запросе.
 	numRepeatTask, errMap := repNumsParse(clearRep)
