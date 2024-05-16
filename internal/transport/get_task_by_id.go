@@ -13,7 +13,7 @@ import (
 	"github.com/ra1nz0r/go_final_project/internal/services"
 )
 
-func GetTaskById(w http.ResponseWriter, r *http.Request) {
+func GetTaskByID(w http.ResponseWriter, r *http.Request) {
 	// Получаем путь из функции и подключаемся к датабазе.
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
 	db, errOpen := sql.Open("sqlite3", dbResPath)
@@ -31,9 +31,9 @@ func GetTaskById(w http.ResponseWriter, r *http.Request) {
 
 	// Оборачиваем полученные данные в JSON и готовим к выводу,
 	// ответ в виде: {"id": "айди","date": "дата","title": "заголовок","comment": "коммент","repeat": "условия повторения"}.
-	jsonResp, errJson := json.Marshal(idGeted)
-	if errJson != nil {
-		config.LogErr.Error().Err(errJson).Msg("Failed attempt json-marshal response.")
+	jsonResp, errJSON := json.Marshal(idGeted)
+	if errJSON != nil {
+		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

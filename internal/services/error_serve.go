@@ -10,9 +10,9 @@ import (
 // Оборачивает ошибки в JSON и возвращает в формате {"error":"ваш текст для ошибки"}.
 func ErrReturn(result map[string]string, err string, w http.ResponseWriter) {
 	result["error"] = err
-	jsonResp, errJson := json.Marshal(result)
-	if errJson != nil {
-		config.LogErr.Error().Err(errJson).Msg("Failed attempt json-marshal response.")
+	jsonResp, errJSON := json.Marshal(result)
+	if errJSON != nil {
+		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -17,23 +17,23 @@ import (
 // Переменная bool используется один раз, для вывода сообщения о существовании перменной «TODO _PORT» в «.env»
 // и изменении стандартного порта при запуске сервера, в остальных случаях пропускается.
 func SetServerLink(address string, port string) (string, bool) {
-	bool := false
+	boolValue := false
 	if portFromEnv, exists := os.LookupEnv("TODO_PORT"); exists && portFromEnv != "" {
 		port = portFromEnv
-		bool = true
+		boolValue = true
 	}
-	return address + port, bool
+	return address + port, boolValue
 }
 
 // Изменяет путь по умолчанию к базе данных на «TODO_DBFILE», если переменная существует в «.env».
 // Переменная bool используется один раз, для вывода сообщения о существовании перменной «TODO_DBFILE» в «.env»
 // и изменении стандартного пути датабазы при запуске сервера, в остальных случаях пропускается.
 func CheckEnvDbVarOnExists(dbDefaultPath string) (string, bool) {
-	bool := false
+	boolValue := false
 	if dbPathFromEnv := os.Getenv("TODO_DBFILE"); dbPathFromEnv != "" {
-		dbDefaultPath, bool = dbPathFromEnv, true
+		dbDefaultPath, boolValue = dbPathFromEnv, true
 	}
-	return dbDefaultPath, bool
+	return dbDefaultPath, boolValue
 }
 
 // Проверка существования DB.

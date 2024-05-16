@@ -87,9 +87,9 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 
 	// Оборачиваем полученные данные в JSON и готовим к выводу,
 	// ответ в виде: {"tasks":[{task1}, {task2}, .... ]}.
-	jsonResp, errJson := json.Marshal(respResult)
-	if errJson != nil {
-		config.LogErr.Error().Err(errJson).Msg("Failed attempt json-marshal response.")
+	jsonResp, errJSON := json.Marshal(respResult)
+	if errJSON != nil {
+		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

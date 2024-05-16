@@ -17,12 +17,12 @@ import (
 )
 
 func Run() {
-	serverLink, bool := services.SetServerLink(":", config.DefaultPort)
-	if bool {
+	serverLink, boolValue := services.SetServerLink(":", config.DefaultPort)
+	if boolValue {
 		config.LogInfo.Info().Msg("'TODO_PORT' exitst in '.env' file. Changing default PORT.")
 	}
-	dbResultPath, bool := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
-	if bool {
+	dbResultPath, boolValue := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
+	if boolValue {
 		config.LogInfo.Info().Msg("'TODO_DBFILE' exitst in '.env' file. Changing default PATH.")
 	}
 
@@ -44,7 +44,7 @@ func Run() {
 	r.Post("/api/task/done", transport.GeneratedNextDate)
 
 	r.Delete("/api/task", transport.DeleteTaskScheduler)
-	r.Get("/api/task", transport.GetTaskById)
+	r.Get("/api/task", transport.GetTaskByID)
 	r.Post("/api/task", transport.AddSchedulerTask)
 	r.Put("/api/task", transport.UpdateTask)
 

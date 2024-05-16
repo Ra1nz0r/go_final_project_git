@@ -93,9 +93,9 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	// Создание мапы и выведение последнего ID добавленного в датабазу, ответ в виде: {"id":"186"}.
 	respResult := make(map[string]string)
 	respResult["id"] = insertedTask.ID
-	jsonResp, errJson := json.Marshal(respResult)
-	if errJson != nil {
-		config.LogErr.Error().Err(errJson).Msg("Failed attempt json-marshal response.")
+	jsonResp, errJSON := json.Marshal(respResult)
+	if errJSON != nil {
+		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
