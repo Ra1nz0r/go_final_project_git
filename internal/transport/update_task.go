@@ -4,9 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-
 	"fmt"
-
 	"io"
 	"net/http"
 	"time"
