@@ -51,7 +51,7 @@ func CheckDBFileExists(resPath string) error {
 			ctx := context.Background()
 			db, errOpen := sql.Open("sqlite3", resPath)
 			if errOpen != nil {
-				return fmt.Errorf("failed: cannot open db: %v", errOpen)
+				return fmt.Errorf("failed: cannot open DB: %v", errOpen)
 			}
 
 			// Создание TABLE.
