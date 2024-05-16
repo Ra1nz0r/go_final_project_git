@@ -18,14 +18,14 @@ func TestTask(t *testing.T) {
 
 	now := time.Now()
 
-	task := task{
+	taskT := task{
 		date:    now.Format(`20060102`),
 		title:   "Созвон в 16:00",
 		comment: "Обсуждение планов",
 		repeat:  "d 5",
 	}
 
-	todo := addTask(t, task)
+	todo := addTask(t, taskT)
 
 	body, err := requestJSON("api/task", nil, http.MethodGet)
 	assert.NoError(t, err)
@@ -43,10 +43,10 @@ func TestTask(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, todo, m["id"])
-	assert.Equal(t, task.date, m["date"])
-	assert.Equal(t, task.title, m["title"])
-	assert.Equal(t, task.comment, m["comment"])
-	assert.Equal(t, task.repeat, m["repeat"])
+	assert.Equal(t, taskT.date, m["date"])
+	assert.Equal(t, taskT.title, m["title"])
+	assert.Equal(t, taskT.comment, m["comment"])
+	assert.Equal(t, taskT.repeat, m["repeat"])
 }
 
 type fulltask struct {

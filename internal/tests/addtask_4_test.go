@@ -38,9 +38,9 @@ func requestJSON(apipath string, values map[string]any, method string) ([]byte, 
 
 	client := &http.Client{}
 	if len(config.Token) > 0 {
-		jar, err := cookiejar.New(nil)
-		if err != nil {
-			return nil, err
+		jar, errJar := cookiejar.New(nil)
+		if errJar != nil {
+			return nil, errJar
 		}
 		jar.SetCookies(req.URL, []*http.Cookie{
 			{
