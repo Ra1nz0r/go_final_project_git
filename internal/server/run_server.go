@@ -3,12 +3,13 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"fmt"
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/ra1nz0r/go_final_project/internal/logerr"

@@ -169,7 +169,7 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[int]time.Time, cur
 				default:
 					// Если мапа с месяцами не пустая, то обновляем значение итоговой даты,
 					if len(resMapMonth) > 0 {
-						resDate = resDate.AddDate(0, int(MinMonthCnt(resMapMonth))-1, 0)
+						resDate = resDate.AddDate(0, MinMonthCnt(resMapMonth)-1, 0)
 					}
 					// Пока день итоговый даты не равен переданному, то прибавляем дни и считаем их кол-во.
 					for ok := true; ok; ok = (resDate.Day() != mNum) {
@@ -183,7 +183,9 @@ func monthRepeatCount(numRepeatTask map[int][]int, resMap map[int]time.Time, cur
 				resDate = startDate
 			case 1:
 				// см. описание функции
-				nearestMonth(resMapMonth, mNum, currentDate, startDate)
+				if errNear := nearestMonth(resMapMonth, mNum, currentDate, startDate); errNear != nil {
+					return "", errNear
+				}
 			}
 		}
 	}
