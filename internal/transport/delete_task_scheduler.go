@@ -24,13 +24,13 @@ func DeleteTaskScheduler(w http.ResponseWriter, r *http.Request) {
 	queries := database.New(db)
 	_, errGeted := queries.GetTask(context.Background(), r.URL.Query().Get("id"))
 	if errGeted != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("The ID you entered does not exist: %v", errGeted), w)
+		services.ErrReturn(fmt.Errorf("the ID you entered does not exist: %w", errGeted), w)
 		return
 	}
 
 	// Удаляем задачу из базы данных, при DELETE запросе в виде "/api/task?id=185".
 	if errDel := queries.DeleteTask(context.Background(), r.URL.Query().Get("id")); errDel != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed delete: %v", errDel), w)
+		services.ErrReturn(fmt.Errorf("failed delete: %w", errDel), w)
 		return
 	}
 

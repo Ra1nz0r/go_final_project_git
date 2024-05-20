@@ -34,13 +34,13 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	// Обрабатываем полученные данные из JSON и записываем в структуру.
 	var task database.CreateTaskParams
 	if errUnm := json.Unmarshal(result, &task); errUnm != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("Can't deserialize: %v", errUnm), w)
+		services.ErrReturn(fmt.Errorf("can't deserialize: %w", errUnm), w)
 		return
 	}
 
 	// Проверка на отсутствие поля TITLE.
 	if len(strings.TrimSpace(task.Title)) == 0 {
-		services.ErrReturn(make(map[string]string), "Failed: TITLE cannot be EMPTY.", w)
+		services.ErrReturn(fmt.Errorf("failed: TITLE cannot be EMPTY"), w)
 		return
 	}
 
@@ -51,7 +51,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 
 	// Проверка корректности даты.
 	if _, errPars := time.Parse("20060102", task.Date); errPars != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed, incorrect DATE: %v", errPars), w)
+		services.ErrReturn(fmt.Errorf("failed, incorrect DATE: %w", errPars), w)
 		return
 	}
 
@@ -65,7 +65,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 		default:
 			res, errFunc := services.NextDate(time.Now(), task.Date, task.Repeat)
 			if errFunc != nil {
-				services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed: %v", errFunc), w)
+				services.ErrReturn(fmt.Errorf("failed: %w", errFunc), w)
 				return
 			}
 			if task.Date < time.Now().Format("20060102") {

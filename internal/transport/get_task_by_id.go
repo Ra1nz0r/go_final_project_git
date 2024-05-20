@@ -25,7 +25,7 @@ func GetTaskByID(w http.ResponseWriter, r *http.Request) {
 	queries := database.New(db)
 	idGeted, errGeted := queries.GetTask(context.Background(), r.URL.Query().Get("id"))
 	if errGeted != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("The ID you entered does not exist: %v", errGeted), w)
+		services.ErrReturn(fmt.Errorf("the ID you entered does not exist: %w", errGeted), w)
 		return
 	}
 

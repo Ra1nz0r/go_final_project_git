@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -44,7 +45,7 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 		case errSearch == nil:
 			resDate, resErr := queries.SearchDate(ctx, dateSearch.Format("20060102"))
 			if resErr != nil {
-				services.ErrReturn(make(map[string]string), resErr.Error(), w)
+				services.ErrReturn(fmt.Errorf("%w", resErr), w)
 				return
 			}
 			respResult["tasks"] = resDate
@@ -59,7 +60,7 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 			search := strings.ToLower("%" + r.URL.Query().Get("search") + "%")
 			resSearch, resErr := queries.SearchTasks(ctx, search)
 			if resErr != nil {
-				services.ErrReturn(make(map[string]string), resErr.Error(), w)
+				services.ErrReturn(fmt.Errorf("%w", resErr), w)
 				return
 			}
 			respResult["tasks"] = resSearch
@@ -74,7 +75,7 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 	default:
 		resList, resErr := queries.ListTasks(ctx)
 		if resErr != nil {
-			services.ErrReturn(make(map[string]string), resErr.Error(), w)
+			services.ErrReturn(fmt.Errorf("%w", resErr), w)
 			return
 		}
 		respResult["tasks"] = resList

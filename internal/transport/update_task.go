@@ -27,7 +27,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	// Обрабатываем полученные данные из JSON и записываем в структуру.
 	var task database.UpdateTaskParams
 	if errUnm := json.Unmarshal(result, &task); errUnm != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("Can't deserialize: %v", errUnm), w)
+		services.ErrReturn(fmt.Errorf("can't deserialize: %w", errUnm), w)
 		return
 	}
 
@@ -40,14 +40,14 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	// Проверяем корректность запроса для обновления параметров задачи в планировщике.
 	if _, errFunc := services.NextDate(time.Now(), task.Date, task.Repeat); errFunc != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed: %v", errFunc), w)
+		services.ErrReturn(fmt.Errorf("failed: %w", errFunc), w)
 		return
 	}
 
 	// Если все данные введены корректно, то обновляем задачу в планировщике.
 	queries := database.New(db)
 	if errUpdate := queries.UpdateTask(context.Background(), task); errUpdate != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("Can't update task scheduler: %v", errUpdate), w)
+		services.ErrReturn(fmt.Errorf("can't update task scheduler: %w", errUpdate), w)
 		return
 	}
 

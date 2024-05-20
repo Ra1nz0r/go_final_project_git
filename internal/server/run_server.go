@@ -39,14 +39,16 @@ func Run() {
 
 	r.Get("/api/nextdate", transport.NextDateHand)
 
-	r.Get("/api/tasks", transport.UpcomingTasksWithSearch)
+	r.Get("/api/tasks", transport.CheckAuth(transport.UpcomingTasksWithSearch))
 
-	r.Post("/api/task/done", transport.GeneratedNextDate)
+	r.Post("/api/task/done", transport.CheckAuth(transport.GeneratedNextDate))
 
-	r.Delete("/api/task", transport.DeleteTaskScheduler)
-	r.Get("/api/task", transport.GetTaskByID)
-	r.Post("/api/task", transport.AddSchedulerTask)
-	r.Put("/api/task", transport.UpdateTask)
+	r.Post("/api/signin", transport.LoginAuth)
+
+	r.Delete("/api/task", transport.CheckAuth(transport.DeleteTaskScheduler))
+	r.Get("/api/task", transport.CheckAuth(transport.GetTaskByID))
+	r.Post("/api/task", transport.CheckAuth(transport.AddSchedulerTask))
+	r.Put("/api/task", transport.CheckAuth(transport.UpdateTask))
 
 	config.LogInfo.Info().Msgf("Starting server on: '%s'", serverLink)
 

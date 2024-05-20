@@ -7,9 +7,10 @@ import (
 	"github.com/ra1nz0r/go_final_project/internal/config"
 )
 
-// Оборачивает ошибки в JSON и возвращает в формате {"error":"ваш текст для ошибки"}.
-func ErrReturn(result map[string]string, err string, w http.ResponseWriter) {
-	result["error"] = err
+// Добавляет ошибки в JSON и возвращает ответ в формате {"error":"ваш текст для ошибки"}.
+func ErrReturn(err error, w http.ResponseWriter) {
+	result := make(map[string]string)
+	result["error"] = err.Error()
 	jsonResp, errJSON := json.Marshal(result)
 	if errJSON != nil {
 		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")

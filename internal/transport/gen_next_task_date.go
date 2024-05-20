@@ -25,20 +25,20 @@ func GeneratedNextDate(w http.ResponseWriter, r *http.Request) {
 	queries := database.New(db)
 	taskGeted, errGeted := queries.GetTask(context.Background(), r.URL.Query().Get("id"))
 	if errGeted != nil {
-		services.ErrReturn(make(map[string]string), fmt.Sprintf("The ID you entered does not exist: %v", errGeted), w)
+		services.ErrReturn(fmt.Errorf("the ID you entered does not exist: %w", errGeted), w)
 		return
 	}
 
 	switch {
 	case taskGeted.Repeat == "": // Одноразовая задача с пустым полем REPEAT удаляется.
 		if errDel := queries.DeleteTask(context.Background(), taskGeted.ID); errDel != nil {
-			services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed delete: %v", errDel), w)
+			services.ErrReturn(fmt.Errorf("failed delete: %w", errDel), w)
 			return
 		}
 	default: // В остальных случаях, расчитывается и записывается новая дата для задачи вместо старой.
 		newDate, errFunc := services.NextDate(time.Now(), taskGeted.Date, taskGeted.Repeat)
 		if errFunc != nil {
-			services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed: %v", errFunc), w)
+			services.ErrReturn(fmt.Errorf("failed: %w", errFunc), w)
 			return
 		}
 
@@ -46,7 +46,7 @@ func GeneratedNextDate(w http.ResponseWriter, r *http.Request) {
 		task.ID = taskGeted.ID
 		task.Date = newDate
 		if errUpd := queries.UpdateDateTask(context.Background(), task); errUpd != nil {
-			services.ErrReturn(make(map[string]string), fmt.Sprintf("Failed update task: %v", errUpd), w)
+			services.ErrReturn(fmt.Errorf("failed update task: %w", errUpd), w)
 			return
 		}
 	}
