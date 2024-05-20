@@ -2,10 +2,11 @@ package transport
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
+
+	"fmt"
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/ra1nz0r/go_final_project/internal/services"
@@ -38,7 +39,7 @@ func LoginAuth(w http.ResponseWriter, r *http.Request) {
 	respResult := make(map[string]string)
 	switch {
 	case passFromEnv == u.Password:
-		passHash, errCrypt := bcrypt.GenerateFromPassword([]byte(passFromEnv), bcrypt.MinCost)
+		passHash, errCrypt := bcrypt.GenerateFromPassword([]byte(passFromEnv), bcrypt.DefaultCost)
 		if errCrypt != nil {
 			services.ErrReturn(fmt.Errorf("failed to generate password hash: %w", errCrypt), w)
 		}

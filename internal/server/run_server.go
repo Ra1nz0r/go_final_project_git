@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
+	mwar "github.com/ra1nz0r/go_final_project/internal/middleware"
 	"github.com/ra1nz0r/go_final_project/internal/services"
-	"github.com/ra1nz0r/go_final_project/internal/transport"
+	tp "github.com/ra1nz0r/go_final_project/internal/transport"
 
 	"github.com/go-chi/chi"
 )
@@ -37,18 +38,18 @@ func Run() {
 	config.LogInfo.Info().Msg("Running handlers.")
 	r.Handle("/*", fileServer)
 
-	r.Get("/api/nextdate", transport.NextDateHand)
+	r.Get("/api/nextdate", tp.NextDateHand)
 
-	r.Get("/api/tasks", transport.CheckAuth(transport.UpcomingTasksWithSearch))
+	r.Get("/api/tasks", mwar.CheckAuth(tp.UpcomingTasksWithSearch))
 
-	r.Post("/api/task/done", transport.CheckAuth(transport.GeneratedNextDate))
+	r.Post("/api/task/done", mwar.CheckAuth(tp.GeneratedNextDate))
 
-	r.Post("/api/signin", transport.LoginAuth)
+	r.Post("/api/signin", tp.LoginAuth)
 
-	r.Delete("/api/task", transport.CheckAuth(transport.DeleteTaskScheduler))
-	r.Get("/api/task", transport.CheckAuth(transport.GetTaskByID))
-	r.Post("/api/task", transport.CheckAuth(transport.AddSchedulerTask))
-	r.Put("/api/task", transport.CheckAuth(transport.UpdateTask))
+	r.Delete("/api/task", mwar.CheckAuth(tp.DeleteTaskScheduler))
+	r.Get("/api/task", mwar.CheckAuth(tp.GetTaskByID))
+	r.Post("/api/task", mwar.CheckAuth(tp.AddSchedulerTask))
+	r.Put("/api/task", mwar.CheckAuth(tp.UpdateTask))
 
 	config.LogInfo.Info().Msgf("Starting server on: '%s'", serverLink)
 
