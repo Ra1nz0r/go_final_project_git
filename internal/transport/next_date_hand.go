@@ -6,7 +6,7 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 )
 
@@ -28,12 +28,12 @@ func NextDateHand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	w.WriteHeader(http.StatusOK)
 
 	if _, errWrite := w.Write([]byte(res)); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msgf("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
 }

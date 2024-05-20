@@ -8,7 +8,7 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,11 +17,14 @@ type User struct {
 	Password string `json:"password"`
 }
 
+// Обрабатывает POST запрос и принимает на вход пароль пользователя в JSON формате,
+// декодирует его в структуру User, в дальнейшем сверяет его с хранящимся в "TODO_PASSWORD"
+// в ".env" файле и в случае совпадения отвечатет хэш-суммой пароля. В противном записывает ошибку.
 func LoginAuth(w http.ResponseWriter, r *http.Request) {
 	// Читаем данные из тела запроса.
 	result, errBody := io.ReadAll(r.Body)
 	if errBody != nil {
-		config.LogErr.Error().Err(errBody).Msg("Cannot read from BODY.")
+		logerr.ErrEvent("cannot read from BODY", errBody)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -45,14 +48,14 @@ func LoginAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		respResult["token"] = string(passHash)
 	default:
-		respResult["error"] = "Incorrect password."
+		services.ErrReturn(fmt.Errorf("incorrect password"), w)
 	}
 
 	// Оборачиваем полученные данные в JSON и готовим к выводу,
-	// ответ в виде: {"token/error":"hash/txt_error"}.
+	// ответ в виде: {"token":"hash"}.
 	jsonResp, errJSON := json.Marshal(respResult)
 	if errJSON != nil {
-		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
+		logerr.ErrEvent("failed attempt json-marshal response", errJSON)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -62,7 +65,7 @@ func LoginAuth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 
 	if _, errWrite := w.Write(jsonResp); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msg("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
 }

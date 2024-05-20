@@ -13,6 +13,7 @@ import (
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/ra1nz0r/go_final_project/internal/database"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 )
 
@@ -26,7 +27,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	// Читаем данные из тела запроса.
 	result, errBody := io.ReadAll(r.Body)
 	if errBody != nil {
-		config.LogErr.Error().Err(errBody).Msg("Cannot read from BODY.")
+		logerr.ErrEvent("cannot read from BODY", errBody)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -78,14 +79,14 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
 	db, errOpen := sql.Open("sqlite3", dbResPath)
 	if errOpen != nil {
-		config.LogErr.Fatal().Err(errOpen).Msg("Unable to connect to the database.")
+		logerr.FatalEvent("unable to connect to the database", errOpen)
 	}
 
 	// Если данные корректны, то создаём запись в датабазе.
 	queries := database.New(db)
 	insertedTask, errCreate := queries.CreateTask(context.Background(), task)
 	if errCreate != nil {
-		config.LogErr.Error().Err(errCreate).Msgf("Cannot create task in DB.")
+		logerr.ErrEvent("cannot create task in DB", errCreate)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -95,7 +96,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	respResult["id"] = insertedTask.ID
 	jsonResp, errJSON := json.Marshal(respResult)
 	if errJSON != nil {
-		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
+		logerr.ErrEvent("failed attempt json-marshal response", errJSON)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -105,7 +106,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	if _, errWrite := w.Write(jsonResp); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msg("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
 }

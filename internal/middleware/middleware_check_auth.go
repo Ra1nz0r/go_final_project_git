@@ -7,7 +7,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CheckAuth(endpoint http.HandlerFunc) http.HandlerFunc {
+// Проверяет существование переменной "TODO_PASSWORD" в ".env" и в положительном случае,
+// берёт хэш сумму из cookie, сравнивает с хранящимся паролем и разрешает доступ
+// к планировщику. В противном случае, возвращает ошибку и запрещает доступ.
+func CheckAuth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		passFromEnv, exists := os.LookupEnv("TODO_PASSWORD")
 		if exists && passFromEnv != "" {
@@ -21,6 +24,6 @@ func CheckAuth(endpoint http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 		}
-		endpoint(w, r)
+		next(w, r)
 	})
 }

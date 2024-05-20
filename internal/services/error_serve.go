@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 )
 
 // Добавляет ошибки в JSON и возвращает ответ в формате {"error":"ваш текст для ошибки"}.
@@ -13,7 +13,7 @@ func ErrReturn(err error, w http.ResponseWriter) {
 	result["error"] = err.Error()
 	jsonResp, errJSON := json.Marshal(result)
 	if errJSON != nil {
-		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
+		logerr.ErrEvent("failed attempt json-marshal response", errJSON)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -23,7 +23,7 @@ func ErrReturn(err error, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusBadRequest)
 
 	if _, errWrite := w.Write(jsonResp); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msgf("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
 }

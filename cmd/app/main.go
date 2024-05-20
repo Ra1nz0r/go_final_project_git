@@ -8,6 +8,5 @@ import (
 )
 
 func main() {
-
 	server.Run()
 }

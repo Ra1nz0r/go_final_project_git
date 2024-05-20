@@ -12,6 +12,7 @@ import (
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/ra1nz0r/go_final_project/internal/database"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 )
 
@@ -19,7 +20,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	// Читаем данные из тела запроса.
 	result, errBody := io.ReadAll(r.Body)
 	if errBody != nil {
-		config.LogErr.Error().Err(errBody).Msg("Cannot read from BODY.")
+		logerr.ErrEvent("cannot read from BODY", errBody)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -35,7 +36,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
 	db, errOpen := sql.Open("sqlite3", dbResPath)
 	if errOpen != nil {
-		config.LogErr.Fatal().Err(errOpen).Msg("Unable to connect to the database.")
+		logerr.FatalEvent("unable to connect to the database", errOpen)
 	}
 
 	// Проверяем корректность запроса для обновления параметров задачи в планировщике.
@@ -56,7 +57,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 
 	if _, errWrite := w.Write([]byte(`{}`)); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msg("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/ra1nz0r/go_final_project/internal/database"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 )
 
@@ -18,7 +19,7 @@ func GetTaskByID(w http.ResponseWriter, r *http.Request) {
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
 	db, errOpen := sql.Open("sqlite3", dbResPath)
 	if errOpen != nil {
-		config.LogErr.Fatal().Err(errOpen).Msg("Unable to connect to the database.")
+		logerr.FatalEvent("unable to connect to the database", errOpen)
 	}
 
 	// Получаем задачу из планировщика при GET запросе в виде "/api/task?id=185".
@@ -33,7 +34,7 @@ func GetTaskByID(w http.ResponseWriter, r *http.Request) {
 	// ответ в виде: {"id": "айди","date": "дата","title": "заголовок","comment": "коммент","repeat": "условия повторения"}.
 	jsonResp, errJSON := json.Marshal(idGeted)
 	if errJSON != nil {
-		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
+		logerr.ErrEvent("failed attempt json-marshal response", errJSON)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -43,8 +44,7 @@ func GetTaskByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if _, errWrite := w.Write(jsonResp); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msg("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
-
 }

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	mwar "github.com/ra1nz0r/go_final_project/internal/middleware"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 	tp "github.com/ra1nz0r/go_final_project/internal/transport"
@@ -20,22 +22,22 @@ import (
 func Run() {
 	serverLink, boolValue := services.SetServerLink(":", config.DefaultPort)
 	if boolValue {
-		config.LogInfo.Info().Msg("'TODO_PORT' exitst in '.env' file. Changing default PORT.")
+		logerr.InfoMsg("'TODO_PORT' exists in '.env' file. Changing default PORT.")
 	}
 	dbResultPath, boolValue := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
 	if boolValue {
-		config.LogInfo.Info().Msg("'TODO_DBFILE' exitst in '.env' file. Changing default PATH.")
+		logerr.InfoMsg("'TODO_DBFILE' exists in '.env' file. Changing default PATH.")
 	}
 
-	config.LogInfo.Info().Msg("Checking DB on exists.")
+	logerr.InfoMsg("Checking DB on exists.")
 	if errCheck := services.CheckDBFileExists(dbResultPath); errCheck != nil {
-		config.LogErr.Fatal().Err(errCheck).Msgf("Cannot check DB on exists.")
+		logerr.FatalEvent("cannot check DB on exists", errCheck)
 	}
 
 	r := chi.NewRouter()
 
 	fileServer := http.FileServer(http.Dir(config.DefaultWebDir))
-	config.LogInfo.Info().Msg("Running handlers.")
+	logerr.InfoMsg("Running handlers.")
 	r.Handle("/*", fileServer)
 
 	r.Get("/api/nextdate", tp.NextDateHand)
@@ -51,7 +53,7 @@ func Run() {
 	r.Post("/api/task", mwar.CheckAuth(tp.AddSchedulerTask))
 	r.Put("/api/task", mwar.CheckAuth(tp.UpdateTask))
 
-	config.LogInfo.Info().Msgf("Starting server on: '%s'", serverLink)
+	logerr.InfoMsg(fmt.Sprintf("Starting server on: '%s'", serverLink))
 
 	srv := http.Server{
 		Addr:         serverLink,
@@ -62,9 +64,9 @@ func Run() {
 
 	go func() {
 		if errListn := srv.ListenAndServe(); !errors.Is(errListn, http.ErrServerClosed) {
-			config.LogErr.Fatal().Err(errListn).Msg("HTTP server error.")
+			logerr.FatalEvent("HTTP server error", errListn)
 		}
-		config.LogInfo.Info().Msg("Stopped serving new connections.")
+		logerr.InfoMsg("Stopped serving new connections.")
 	}()
 
 	sigChan := make(chan os.Signal, 1)
@@ -75,7 +77,7 @@ func Run() {
 	defer shutdownRelease()
 
 	if errShut := srv.Shutdown(shutdownCtx); errShut != nil {
-		config.LogErr.Fatal().Err(errShut).Msg("HTTP shutdown error")
+		logerr.FatalEvent("HTTP shutdown error", errShut)
 	}
-	config.LogInfo.Info().Msg("Graceful shutdown complete.")
+	logerr.InfoMsg("Graceful shutdown complete.")
 }

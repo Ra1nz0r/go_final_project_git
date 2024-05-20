@@ -12,6 +12,7 @@ import (
 
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/ra1nz0r/go_final_project/internal/database"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/services"
 )
 
@@ -25,7 +26,7 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
 	db, errOpen := sql.Open("sqlite3", dbResPath)
 	if errOpen != nil {
-		config.LogErr.Fatal().Err(errOpen).Msg("Unable to connect to the database.")
+		logerr.FatalEvent("unable to connect to the database", errOpen)
 	}
 
 	// Создание мапы для выведения полученных данных в виде:
@@ -91,7 +92,7 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 	// ответ в виде: {"tasks":[{task1}, {task2}, .... ]}.
 	jsonResp, errJSON := json.Marshal(respResult)
 	if errJSON != nil {
-		config.LogErr.Error().Err(errJSON).Msg("Failed attempt json-marshal response.")
+		logerr.ErrEvent("failed attempt json-marshal response", errJSON)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -101,8 +102,7 @@ func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if _, errWrite := w.Write(jsonResp); errWrite != nil {
-		config.LogErr.Error().Err(errWrite).Msg("Failed attempt WRITE response.")
+		logerr.ErrEvent("failed attempt WRITE response", errWrite)
 		return
 	}
-
 }

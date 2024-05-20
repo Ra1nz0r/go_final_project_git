@@ -8,7 +8,7 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/go_final_project/internal/logerr"
 	"github.com/ra1nz0r/go_final_project/internal/models"
 )
 
@@ -45,23 +45,23 @@ func CheckDBFileExists(resPath string) error {
 			// Создание папки хранения для базы данных.
 			folderDb := filepath.Dir(resPath)
 			if errMkDir := os.Mkdir(folderDb, 0777); errMkDir != nil {
-				return fmt.Errorf("failed: cannot create folder: %v", errMkDir)
+				return fmt.Errorf("failed: cannot create folder: %w", errMkDir)
 			}
 
-			config.LogInfo.Info().Msgf("Creating %s and TABLE.", filepath.Base(resPath))
+			logerr.InfoMsg(fmt.Sprintf("Creating %s and TABLE.", filepath.Base(resPath)))
 			ctx := context.Background()
 			db, errOpen := sql.Open("sqlite3", resPath)
 			if errOpen != nil {
-				return fmt.Errorf("failed: cannot open DB: %v", errOpen)
+				logerr.FatalEvent("cannot open DB", errOpen)
 			}
 
 			// Создание TABLE.
 			if _, errCreate := db.ExecContext(ctx, models.Ddl); errCreate != nil {
-				return fmt.Errorf("failed: cannot create table db: %v", errCreate)
+				return fmt.Errorf("failed: cannot create table db: %w", errCreate)
 			}
 			return nil
 		}
 	}
-	config.LogInfo.Info().Msgf("Database %s exists.", filepath.Base(resPath))
+	logerr.InfoMsg(fmt.Sprintf("Database %s exists.", filepath.Base(resPath)))
 	return nil
 }

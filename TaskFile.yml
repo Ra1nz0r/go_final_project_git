@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  run: # название задачи для запуска
+    desc: "Runs all '.go' files."
+    cmds:
+      - go run ./...
+      
+  test: # название задачи для запуска
+   desc: "Runs all test files without cache and with info."
+   cmds:
+     - go test -v ./... -count=1
