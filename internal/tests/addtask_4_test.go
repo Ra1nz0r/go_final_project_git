@@ -43,8 +43,8 @@ func requestJSON(apipath string, values map[string]any, method string) ([]byte, 
 	if err := godotenv.Load("../../.env"); err != nil {
 		log.Fatal("No .env file found")
 	}
-	hashSum := os.Getenv("TODO_HASH_FOR_TEST")
-	if len(hashSum) > 0 {
+	hashSumm := os.Getenv("TODO_HASH_FOR_TEST")
+	if len(hashSumm) > 0 {
 		jar, errJar := cookiejar.New(nil)
 		if errJar != nil {
 			return nil, errJar
@@ -52,7 +52,7 @@ func requestJSON(apipath string, values map[string]any, method string) ([]byte, 
 		jar.SetCookies(req.URL, []*http.Cookie{
 			{
 				Name:  "token",
-				Value: hashSum,
+				Value: hashSumm,
 			},
 		})
 		client.Jar = jar
