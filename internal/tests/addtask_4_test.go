@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
+	"os"
 	"strconv"
 	"testing"
 	"time"
 
 	"fmt"
 
+	"github.com/joho/godotenv"
 	"github.com/ra1nz0r/go_final_project/internal/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +40,11 @@ func requestJSON(apipath string, values map[string]any, method string) ([]byte, 
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	if len(config.Token) > 0 {
+	if err := godotenv.Load("../../.env"); err != nil {
+		log.Fatal("No .env file found")
+	}
+	hashSum := os.Getenv("TODO_HASH_FOR_TEST")
+	if len(hashSum) > 0 {
 		jar, errJar := cookiejar.New(nil)
 		if errJar != nil {
 			return nil, errJar
@@ -45,7 +52,7 @@ func requestJSON(apipath string, values map[string]any, method string) ([]byte, 
 		jar.SetCookies(req.URL, []*http.Cookie{
 			{
 				Name:  "token",
-				Value: config.Token,
+				Value: hashSum,
 			},
 		})
 		client.Jar = jar
