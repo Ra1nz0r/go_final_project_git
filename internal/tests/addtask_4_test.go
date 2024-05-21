@@ -40,7 +40,7 @@ func requestJSON(apipath string, values map[string]any, method string) ([]byte, 
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	if err := godotenv.Load("../../.env"); err != nil {
+	if errLoad := godotenv.Load("../../.env"); errLoad != nil {
 		log.Fatal("No .env file found")
 	}
 	hashSumm := os.Getenv("TODO_HASH_FOR_TEST")
