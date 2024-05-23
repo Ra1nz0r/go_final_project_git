@@ -1,8 +1,10 @@
 ---
 linters:
   enable:
+    - errname
     - gosec
     - unconvert
+    - gofmt
     - gocyclo
     - goconst
     - goimports

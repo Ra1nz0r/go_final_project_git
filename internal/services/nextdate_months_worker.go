@@ -6,8 +6,6 @@ import (
 	"fmt"
 )
 
-// === Для случаев без месяцев в REPEAT: "m 5", "m 10,17", ... === //
-
 // Для 'm'-случаев, задача назначается в указанные дни недели, m <через запятую от 1 до 31,-1,-2> [через запятую от 1 до 12].
 // При этом вторая последовательность чисел опциональна и указывает на определённые месяцы.
 // Например:
@@ -17,6 +15,27 @@ import (
 // m -2 — задача назначается на предпоследний день месяца;
 // m 3 1,3,6 — задача назначается на 3-е число января, марта и июня;
 // m 1,-1 2,8 — задача назначается на 1-е и последнее число число февраля и авгуcта.
+func mounthRepeatCount(clearRep []string, currentDate, startDate time.Time) (string, error) {
+	var resDate string
+	var errRes error
+	switch {
+	case len(clearRep) == 2:
+		resDate, errRes = mRepeatWithout(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
+		}
+	// Вычисления для m-случаев, с переданными днями месяцев и с указанием конкретных месяцев.
+	case len(clearRep) == 3:
+		resDate, errRes = mRepeatWithMonths(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
+		}
+	}
+	return resDate, nil
+}
+
+// === Для случаев без месяцев в REPEAT: "m 5", "m 10,17", ... === //
+
 func mRepeatWithout(clearRep []string, currentDate, startDate time.Time) (string, error) {
 	// Получаем числа дней из REPEAT.
 	monthDays, errD := RepNumsParse(clearRep[1])
