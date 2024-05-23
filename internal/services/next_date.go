@@ -46,17 +46,8 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	}
 
 	// Вычисления для m-случаев, только с переданными днями месяцев без указания конкретных месяцев.
-	if clearRep[0] == "m" && len(clearRep) == 2 {
-		resDate, errRes := mRepeatWithout(clearRep, currentDate, startDate)
-		if errRes != nil {
-			return "", errRes
-		}
-		return resDate, nil
-	}
-
-	// Вычисления для m-случаев, с переданными днями месяцев и с указанием конкретных месяцев.
-	if clearRep[0] == "m" && len(clearRep) == 3 {
-		resDate, errRes := mRepeatWithMonths(clearRep, currentDate, startDate)
+	if clearRep[0] == "m" {
+		resDate, errRes := mounthRepeatCount(clearRep, currentDate, startDate)
 		if errRes != nil {
 			return "", errRes
 		}
