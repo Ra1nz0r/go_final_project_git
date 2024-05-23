@@ -62,11 +62,6 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		return resDate, nil
 	}
 
-	// Если текущая дата идет после стартовой, меняем значение расчётной на текущую.
-	if currentDate.After(startDate) {
-		startDate = currentDate
-	}
-
 	// Вычисления для m-случаев, только с переданными днями месяцев без указания конкретных месяцев.
 	if clearRep[0] == "m" && len(clearRep) == 2 {
 		// Получаем числа дней из REPEAT.
@@ -79,6 +74,11 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		modiDateRes, errD := modifyDate(monthDays, currentDate, startDate)
 		if errD != nil {
 			return "", errD
+		}
+
+		// Если текущая дата идет после стартовой, меняем значение расчётной на текущую.
+		if currentDate.After(startDate) {
+			startDate = currentDate
 		}
 
 		// Из полученных дат, находим следующую ближайщую после стартовой.
@@ -108,6 +108,12 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		if errD != nil {
 			return "", errD
 		}
+
+		// Если текущая дата идет после стартовой, меняем значение расчётной на текущую.
+		if currentDate.After(startDate) {
+			startDate = currentDate
+		}
+
 		// Из полученных дат, находим следующую ближайщую после стартовой.
 		resDate := findNearestDate(modiDateRes, startDate)
 		return resDate, nil
