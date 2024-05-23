@@ -23,16 +23,9 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 
 	// Вычисления для d-случаев.
 	if clearRep[0] == "d" && len(clearRep) == 2 {
-		// Получаем числа дней из REPEAT.
-		days, errD := RepNumsParse(clearRep[1])
-		if errD != nil {
-			return "", errD
-		}
-
-		// Вычисляем и модифицируем даты в соответствии с переданными в days.
-		resDate, errD := dayRepeatCount(days, currentDate, startDate)
-		if errD != nil {
-			return "", errD
+		resDate, errRes := dayRepeatCount(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
 		}
 		return resDate, nil
 	}
@@ -78,12 +71,14 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 // При передаче resDate в функцию, он равен startDate, используется для сравнений и основных подсчётов.
 func FindNearestDate(daysRes []time.Time, startDate time.Time) string {
 	var ttlDat time.Time
-	h, _ := time.ParseDuration("999999h")
-	for _, ttl := range daysRes {
-		dif := ttl.Sub(startDate)
-		if dif.Hours() < h.Hours() && ttl.After(startDate) {
-			h = dif
-			ttlDat = ttl
+	h, errDur := time.ParseDuration("999999h")
+	if errDur == nil {
+		for _, ttl := range daysRes {
+			dif := ttl.Sub(startDate)
+			if dif.Hours() < h.Hours() && ttl.After(startDate) {
+				h = dif
+				ttlDat = ttl
+			}
 		}
 	}
 	return ttlDat.Format("20060102")
