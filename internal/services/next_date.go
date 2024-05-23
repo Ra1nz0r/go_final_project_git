@@ -30,6 +30,21 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 		return resDate, nil
 	}
 
+	// Вычисления для y-случаев.
+	if clearRep[0] == "y" && len(clearRep) == 1 {
+		result := yearRepeatCount(currentDate, startDate)
+		return result, nil
+	}
+
+	// Вычисления для w-случаев.
+	if clearRep[0] == "w" && len(clearRep) == 2 {
+		resDate, errRes := weekRepeatCount(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
+		}
+		return resDate, nil
+	}
+
 	// Вычисления для m-случаев, только с переданными днями месяцев без указания конкретных месяцев.
 	if clearRep[0] == "m" {
 		resDate, errRes := mounthRepeatCount(clearRep, currentDate, startDate)
