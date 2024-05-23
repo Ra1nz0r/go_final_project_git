@@ -1,6 +1,8 @@
 ---
 linters:
   enable:
+    - gosimple
+    - unused
     - errname
     - gosec
     - unconvert
