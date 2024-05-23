@@ -24,7 +24,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 	// Вычисления для d-случаев.
 	if clearRep[0] == "d" && len(clearRep) == 2 {
 		// Получаем числа дней из REPEAT.
-		days, errD := repNumsParse(clearRep[1])
+		days, errD := RepNumsParse(clearRep[1])
 		if errD != nil {
 			return "", errD
 		}
@@ -45,77 +45,28 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 
 	// Вычисления для w-случаев.
 	if clearRep[0] == "w" && len(clearRep) == 2 {
-		// Получаем числа дней из REPEAT.
-		weekDay, errD := repNumsParse(clearRep[1])
-		if errD != nil {
-			return "", errD
+		resDate, errRes := weekRepeatCount(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
 		}
-
-		// Вычисляем и модифицируем даты в соответствии с переданными в weekDay.
-		daysRes, errD := weekRepeatCount(weekDay, currentDate, startDate)
-		if errD != nil {
-			return "", errD
-		}
-
-		// Из полученных дат, находим следующую ближайщую после стартовой.
-		resDate := findNearestDate(daysRes, startDate)
 		return resDate, nil
 	}
 
 	// Вычисления для m-случаев, только с переданными днями месяцев без указания конкретных месяцев.
 	if clearRep[0] == "m" && len(clearRep) == 2 {
-		// Получаем числа дней из REPEAT.
-		monthDays, errD := repNumsParse(clearRep[1])
-		if errD != nil {
-			return "", errD
+		resDate, errRes := mRepeatWithout(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
 		}
-
-		// Вычисляем и модифицируем даты в соответствии с переданными в monthDays.
-		modiDateRes, errD := modifyDate(monthDays, currentDate, startDate)
-		if errD != nil {
-			return "", errD
-		}
-
-		// Если текущая дата идет после стартовой, меняем значение расчётной на текущую.
-		if currentDate.After(startDate) {
-			startDate = currentDate
-		}
-
-		// Из полученных дат, находим следующую ближайщую после стартовой.
-		resDate := findNearestDate(modiDateRes, startDate)
 		return resDate, nil
 	}
 
 	// Вычисления для m-случаев, с переданными днями месяцев и с указанием конкретных месяцев.
 	if clearRep[0] == "m" && len(clearRep) == 3 {
-		// Получаем месяца из REPEAT.
-		months, errM := repNumsParse(clearRep[2])
-		if errM != nil {
-			return "", errM
+		resDate, errRes := mRepeatWithMonths(clearRep, currentDate, startDate)
+		if errRes != nil {
+			return "", errRes
 		}
-		// Вычисляем даты месяцев из переданных в REPAT и меняем день на первый.
-		monthsDateRes, errM := findingMonth(months, currentDate, startDate)
-		if errM != nil {
-			return "", errM
-		}
-		// Получаем числа дней из REPEAT.
-		monthDays, errD := repNumsParse(clearRep[1])
-		if errD != nil {
-			return "", errD
-		}
-		// Модифицируем даты monthRes, изменяя дни на переданные в monthDays.
-		modiDateRes, errD := modifyDayMonth(monthsDateRes, monthDays)
-		if errD != nil {
-			return "", errD
-		}
-
-		// Если текущая дата идет после стартовой, меняем значение расчётной на текущую.
-		if currentDate.After(startDate) {
-			startDate = currentDate
-		}
-
-		// Из полученных дат, находим следующую ближайщую после стартовой.
-		resDate := findNearestDate(modiDateRes, startDate)
 		return resDate, nil
 	}
 	return "", fmt.Errorf("failed: incorrect REPEAT format '%s'", ruleRepeat)
@@ -125,7 +76,7 @@ func NextDate(currentDate time.Time, beginDate string, ruleRepeat string) (strin
 // Если дата из среза меньше введёной, то она пропускается.
 // Возвращает следующую ближайшую дату в виде строки в формате "20060102".
 // При передаче resDate в функцию, он равен startDate, используется для сравнений и основных подсчётов.
-func findNearestDate(daysRes []time.Time, startDate time.Time) string {
+func FindNearestDate(daysRes []time.Time, startDate time.Time) string {
 	var ttlDat time.Time
 	h, _ := time.ParseDuration("999999h")
 	for _, ttl := range daysRes {
@@ -140,7 +91,7 @@ func findNearestDate(daysRes []time.Time, startDate time.Time) string {
 
 // Разбивает по "," строку с числами ("1,2,3", "6,2,1", ...), конвертируя их в int
 // и возвращает срез с этими числами.
-func repNumsParse(clearRepeat string) ([]int, error) {
+func RepNumsParse(clearRepeat string) ([]int, error) {
 	var totalResult []int
 	for _, value := range strings.Split(clearRepeat, ",") {
 		num, errAtoi := strconv.Atoi(value)
