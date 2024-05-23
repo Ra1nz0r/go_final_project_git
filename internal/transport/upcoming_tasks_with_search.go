@@ -24,7 +24,7 @@ import (
 func UpcomingTasksWithSearch(w http.ResponseWriter, r *http.Request) {
 	// Получаем путь из функции и подключаемся к датабазе.
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
-	db, errOpen := sql.Open("sqlite3", dbResPath)
+	db, errOpen := sql.Open("sqlite", dbResPath)
 	if errOpen != nil {
 		logerr.FatalEvent("unable to connect to the database", errOpen)
 	}

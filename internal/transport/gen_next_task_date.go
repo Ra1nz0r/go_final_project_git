@@ -17,7 +17,7 @@ import (
 func GeneratedNextDate(w http.ResponseWriter, r *http.Request) {
 	// Получаем путь из функции и подключаемся к базе данных.
 	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
-	db, errOpen := sql.Open("sqlite3", dbResPath)
+	db, errOpen := sql.Open("sqlite", dbResPath)
 	if errOpen != nil {
 		logerr.FatalEvent("unable to connect to the database", errOpen)
 	}

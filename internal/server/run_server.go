@@ -21,7 +21,7 @@ import (
 )
 
 func Run() {
-	serverLink, boolValue := services.SetServerLink(":", config.DefaultPort)
+	serverLink, boolValue := services.SetServerLink("0.0.0.0:", config.DefaultPort)
 	if boolValue {
 		logerr.InfoMsg("'TODO_PORT' exists in '.env' file. Changing default PORT.")
 	}

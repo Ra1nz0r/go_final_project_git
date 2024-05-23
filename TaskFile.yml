@@ -11,3 +11,8 @@ tasks:
     desc: "Runs all test files without cache and with info."
     cmds:
       - go test -v ./... -count=1
+      
+  docker: # название задачи для запуска
+    desc: "Build docker container."
+    cmds:
+      - docker build --tag my-app:v1 .

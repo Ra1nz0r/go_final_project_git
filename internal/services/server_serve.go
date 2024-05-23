@@ -50,7 +50,7 @@ func CheckDBFileExists(resPath string) error {
 
 			logerr.InfoMsg(fmt.Sprintf("Creating %s and TABLE.", filepath.Base(resPath)))
 			ctx := context.Background()
-			db, errOpen := sql.Open("sqlite3", resPath)
+			db, errOpen := sql.Open("sqlite", resPath)
 			if errOpen != nil {
 				logerr.FatalEvent("cannot open DB", errOpen)
 			}
