@@ -1,4 +1,6 @@
-# Планировщик - проект.
+<h3 style="text-align: center;">Планировщик - проект.</h3>
+
+- [x] Ggggg
 
 - ___С чтением всех значений из файла енв.___\
 ```docker run --name="sched_app" -d --env-file .env -p 7540:7540 scheduler_app:v1```
