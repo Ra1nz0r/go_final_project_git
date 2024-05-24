@@ -1,4 +1,4 @@
-<h3 style="text-align: center;"> Планировщик - проект. </h3>
+<div align="center"> <h1 align="center"> Планировщик - проект. </h1> </div>
 
 - [x] Ggggg
 
