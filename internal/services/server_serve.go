@@ -44,8 +44,12 @@ func CheckDBFileExists(resPath string) error {
 
 			// Создание папки хранения для базы данных.
 			folderDb := filepath.Dir(resPath)
-			if errMkDir := os.Mkdir(folderDb, 0777); errMkDir != nil {
-				return fmt.Errorf("failed: cannot create folder: %w", errMkDir)
+			if _, errStat := os.Stat(folderDb); errStat != nil {
+				if os.IsNotExist(errStat) {
+					if errMkDir := os.Mkdir(folderDb, 0777); errMkDir != nil {
+						return fmt.Errorf("failed: cannot create folder: %w", errMkDir)
+					}
+				}
 			}
 
 			logerr.InfoMsg(fmt.Sprintf("Creating %s and TABLE.", filepath.Base(resPath)))

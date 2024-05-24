@@ -10,9 +10,9 @@ COPY . .
 
 ENV CGO=0 OS=linux ARCH=amd64
 
-RUN CGO_ENABLED=$CGO GOOS=$OS GOARCH=$ARCH go build -o service_app cmd/app/main.go
+RUN CGO_ENABLED=$CGO GOOS=$OS GOARCH=$ARCH go build -o scheduler_app cmd/app/main.go
 
-RUN chmod +x service_app && chmod +x run_sqlite.sh && chmod ugo+rwx -R internal/storage_db
+RUN chmod +x scheduler_app && chmod +x run_sqlite.sh && chmod ugo+rwx -R internal/storage_db
 
 # Run stage
 FROM alpine:3.14
@@ -37,6 +37,10 @@ USER $USER
 
 COPY --from=builder /app .
 
+ENV TODO_PORT=7540
+
+EXPOSE $TODO_PORT
+
 HEALTHCHECK NONE
 
-CMD [ "./service_app" ]
+CMD [ "./scheduler_app" ]
