@@ -1,23 +1,23 @@
 С чтением всех значений из файла енв.
-1. docker run --name="sched_app" -d --env-file .env -p 7540:7540 scheduler_app:v1
+1 docker run --name="sched_app" -d --env-file .env -p 7540:7540 scheduler_app:v1
 
 Запустит на порт указанный в dockerfile EXPOSE 7540. 
-2. docker run --name="sched_app" -d -P scheduler_app:v1
+2 docker run --name="sched_app" -d -P scheduler_app:v1
 
 Обычный запуск с портом по-умолчанию, при изменении не будет работать на введёном порту, сервер так и останется на 7540.
-3. docker run --name="sched_app" -d -p 7540:7540 scheduler_app:v1
+3 docker run --name="sched_app" -d -p 7540:7540 scheduler_app:v1
 
 Если необходимо изменить стандартный порт.
-4. docker run --name="sched_app" -e "TODO_PORT=7544" -d -p 7544:7544 scheduler_app:v1
+4 docker run --name="sched_app" -e "TODO_PORT=7544" -d -p 7544:7544 scheduler_app:v1
 
 Если необходимо изменить стандартный пароль
-5. docker run --name="sched_app" -e "TODO_PASSWORD=gdfsd" -d -p 7540:7540 scheduler_app:v1
+5 docker run --name="sched_app" -e "TODO_PASSWORD=gdfsd" -d -p 7540:7540 scheduler_app:v1
 
 Если необходимо изменить стандартный путь к базе данных и название базы.
-6. docker run --name="sched_app" -e "TODO_DBFILE=internal/sge_db/sdfgduler.db" -d -p 7540:7540 scheduler_app:v1
+6 docker run --name="sched_app" -e "TODO_DBFILE=internal/sge_db/sdfgduler.db" -d -p 7540:7540 scheduler_app:v1
 
 Если необходимо изменить все стандартные значения. При изменении порта, обязательно передавать такое же значение через -p.
-7. docker run --name="sched_app" -e "TODO_DBFILE=internal/sge_db/sdfgduler.db" -e "TODO_PASSWORD=gdfsd" -e "TODO_PORT=7544" -d -p 7544:7544 scheduler_app:v1
+7 docker run --name="sched_app" -e "TODO_DBFILE=internal/sge_db/sdfgduler.db" -e "TODO_PASSWORD=gdfsd" -e "TODO_PORT=7544" -d -p 7544:7544 scheduler_app:v1
 
 Запуск в интерактивном режиме, только при запущенном контейнере:
 docker exec -it sched_app /bin/bash
