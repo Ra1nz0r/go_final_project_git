@@ -24,4 +24,3 @@ linters-settings:
   gocyclo:
     # minimal code complexity to report, 30 by default
     min-complexity: 20
-args: --timeout=10m
