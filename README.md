@@ -1,4 +1,4 @@
-<h3 style="text-align: center;">Планировщик - проект.</h3>
+<h3 style="text-align: center;"> Планировщик - проект. </h3>
 
 - [x] Ggggg
 
