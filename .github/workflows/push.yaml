@@ -2,8 +2,7 @@
 name: Linting and pushing on DockerHub by tag.
 
 on:
-  push:
-    tags: ['v[0-9].[0-9]+.[0-9]+']
+  workflow_dispatch:
 
 permissions: { }
 
@@ -59,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: ra1nz0r/sprint12_cicd_pipeline
+          images: ra1nz0r/go_final_project_git
 
       - name: Build and push Docker Image
         uses: docker/build-push-action@v5
