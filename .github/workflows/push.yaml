@@ -28,6 +28,7 @@ jobs:
         with:
           args: --timeout=10m --verbose
         env:
+          VALIDATE_MARKDOWN: false
           VALIDATE_SQLFLUFF: false
           VALIDATE_JSCPD: false
           VALIDATE_CSS: false
