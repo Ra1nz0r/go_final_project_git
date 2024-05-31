@@ -58,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: ra1nz0r/go_final_project_git
+          images: ra1nz0r/scheduler_app
 
       - name: Build and push Docker Image
         uses: docker/build-push-action@v5

@@ -8,7 +8,7 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/config"
+	"github.com/ra1nz0r/scheduler_app/internal/config"
 	"github.com/stretchr/testify/assert"
 )
 

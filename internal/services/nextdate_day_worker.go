@@ -11,7 +11,6 @@ import (
 // d 1 — каждый день;
 // d 7 — для вычисления следующей даты добавляем семь дней;
 // d 60 — переносим на 60 дней.
-
 func dayRepeatCount(clearRep []string, currentDate, startDate time.Time) (string, error) {
 	// Получаем числа дней из REPEAT.
 	days, errD := RepNumsParse(clearRep[1])

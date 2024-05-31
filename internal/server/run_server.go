@@ -11,11 +11,11 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/config"
-	"github.com/ra1nz0r/go_final_project/internal/logerr"
-	mwar "github.com/ra1nz0r/go_final_project/internal/middleware"
-	"github.com/ra1nz0r/go_final_project/internal/services"
-	tp "github.com/ra1nz0r/go_final_project/internal/transport"
+	"github.com/ra1nz0r/scheduler_app/internal/config"
+	"github.com/ra1nz0r/scheduler_app/internal/logerr"
+	mwar "github.com/ra1nz0r/scheduler_app/internal/middleware"
+	"github.com/ra1nz0r/scheduler_app/internal/services"
+	tp "github.com/ra1nz0r/scheduler_app/internal/transport"
 
 	"github.com/go-chi/chi"
 )

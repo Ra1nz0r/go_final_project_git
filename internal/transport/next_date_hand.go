@@ -6,8 +6,8 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/logerr"
-	"github.com/ra1nz0r/go_final_project/internal/services"
+	"github.com/ra1nz0r/scheduler_app/internal/logerr"
+	"github.com/ra1nz0r/scheduler_app/internal/services"
 )
 
 // Обработчик для GET запросов и вывода следующей даты в текстовом формате

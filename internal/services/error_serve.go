@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ra1nz0r/go_final_project/internal/logerr"
+	"github.com/ra1nz0r/scheduler_app/internal/logerr"
 )
 
 // Добавляет ошибки в JSON и возвращает ответ в формате {"error":"ваш текст для ошибки"}.

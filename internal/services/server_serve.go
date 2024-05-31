@@ -8,8 +8,8 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/go_final_project/internal/logerr"
-	"github.com/ra1nz0r/go_final_project/internal/models"
+	"github.com/ra1nz0r/scheduler_app/internal/logerr"
+	"github.com/ra1nz0r/scheduler_app/internal/models"
 )
 
 // Создает адрес запуска сервера и изменяет порт прослушивания по умолчанию,
