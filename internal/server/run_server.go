@@ -80,7 +80,7 @@ func Run() {
 	r.Post("/api/task", mwar.CheckAuth(q.AddSchedulerTask, conf.EnvPassword))
 	r.Put("/api/task", mwar.CheckAuth(q.UpdateTask, conf.EnvPassword))
 
-	serverLink := config.DefIpAddress + ":" + config.DefaultPort
+	serverLink := config.DefIPAddress + ":" + config.DefaultPort
 
 	logerr.InfoMsg(fmt.Sprintf("Starting server on: '%s'", serverLink))
 
