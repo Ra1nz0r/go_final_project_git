@@ -1,32 +1,19 @@
-package transport
+package handlers
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
 	"fmt"
 
-	"github.com/ra1nz0r/scheduler_app/internal/config"
-	"github.com/ra1nz0r/scheduler_app/internal/database"
 	"github.com/ra1nz0r/scheduler_app/internal/logerr"
-	"github.com/ra1nz0r/scheduler_app/internal/services"
 )
 
-func GetTaskByID(w http.ResponseWriter, r *http.Request) {
-	// Получаем путь из функции и подключаемся к датабазе.
-	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
-	db, errOpen := sql.Open("sqlite", dbResPath)
-	if errOpen != nil {
-		logerr.FatalEvent("unable to connect to the database", errOpen)
-	}
-
+func (q Queries) GetTaskByID(w http.ResponseWriter, r *http.Request) {
 	// Получаем задачу из планировщика при GET запросе в виде "/api/task?id=185".
-	queries := database.New(db)
-	idGeted, errGeted := queries.GetTask(context.Background(), r.URL.Query().Get("id"))
+	idGeted, errGeted := q.Queries.GetTask(r.Context(), r.URL.Query().Get("id"))
 	if errGeted != nil {
-		services.ErrReturn(fmt.Errorf("the ID you entered does not exist: %w", errGeted), w)
+		ErrReturn(fmt.Errorf("the ID you entered does not exist: %w", errGeted), w)
 		return
 	}
 

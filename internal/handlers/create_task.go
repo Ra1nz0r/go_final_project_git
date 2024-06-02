@@ -1,8 +1,6 @@
-package transport
+package handlers
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -11,7 +9,6 @@ import (
 
 	"fmt"
 
-	"github.com/ra1nz0r/scheduler_app/internal/config"
 	"github.com/ra1nz0r/scheduler_app/internal/database"
 	"github.com/ra1nz0r/scheduler_app/internal/logerr"
 	"github.com/ra1nz0r/scheduler_app/internal/services"
@@ -23,7 +20,7 @@ import (
 // title — заголовок задачи, обязательное поле;
 // comment — комментарий к задаче;
 // repeat — правило повторения задачи.
-func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
+func (q Queries) AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	// Читаем данные из тела запроса.
 	result, errBody := io.ReadAll(r.Body)
 	if errBody != nil {
@@ -35,13 +32,13 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 	// Обрабатываем полученные данные из JSON и записываем в структуру.
 	var task database.CreateTaskParams
 	if errUnm := json.Unmarshal(result, &task); errUnm != nil {
-		services.ErrReturn(fmt.Errorf("can't deserialize: %w", errUnm), w)
+		ErrReturn(fmt.Errorf("can't deserialize: %w", errUnm), w)
 		return
 	}
 
 	// Проверка на отсутствие поля TITLE.
 	if len(strings.TrimSpace(task.Title)) == 0 {
-		services.ErrReturn(fmt.Errorf("failed: TITLE cannot be EMPTY"), w)
+		ErrReturn(fmt.Errorf("failed: TITLE cannot be EMPTY"), w)
 		return
 	}
 
@@ -52,7 +49,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 
 	// Проверка корректности даты.
 	if _, errPars := time.Parse("20060102", task.Date); errPars != nil {
-		services.ErrReturn(fmt.Errorf("failed, incorrect DATE: %w", errPars), w)
+		ErrReturn(fmt.Errorf("failed, incorrect DATE: %w", errPars), w)
 		return
 	}
 
@@ -66,7 +63,7 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 		default:
 			res, errFunc := services.NextDate(time.Now(), task.Date, task.Repeat)
 			if errFunc != nil {
-				services.ErrReturn(fmt.Errorf("failed: %w", errFunc), w)
+				ErrReturn(fmt.Errorf("failed: %w", errFunc), w)
 				return
 			}
 			if task.Date < time.Now().Format("20060102") {
@@ -75,16 +72,8 @@ func AddSchedulerTask(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Получаем путь из функции и подключаемся к датабазе.
-	dbResPath, _ := services.CheckEnvDbVarOnExists(config.DbDefaultPath)
-	db, errOpen := sql.Open("sqlite", dbResPath)
-	if errOpen != nil {
-		logerr.FatalEvent("unable to connect to the database", errOpen)
-	}
-
 	// Если данные корректны, то создаём запись в датабазе.
-	queries := database.New(db)
-	insertedTask, errCreate := queries.CreateTask(context.Background(), task)
+	insertedTask, errCreate := q.Queries.CreateTask(r.Context(), task)
 	if errCreate != nil {
 		logerr.ErrEvent("cannot create task in DB", errCreate)
 		w.WriteHeader(http.StatusBadRequest)
